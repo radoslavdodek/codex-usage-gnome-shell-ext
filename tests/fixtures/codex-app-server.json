@@ -1,0 +1,42 @@
+{
+  "success": {
+    "rateLimitsByLimitId": {
+      "codex": {
+        "limitId": "codex",
+        "primary": {"windowDurationMins": 300, "usedPercent": 13, "resetsAt": "2026-02-02T10:00:00Z"},
+        "secondary": {"windowDurationMins": 10080, "usedPercent": 5, "resetsAt": "2026-02-08T10:00:00Z"}
+      }
+    }
+  },
+  "partialWindow": {
+    "rateLimitsByLimitId": {
+      "codex": {
+        "limitId": "codex",
+        "primary": {"windowDurationMins": 300, "usedPercent": 25, "resetsAt": "2026-02-02T10:00:00Z"}
+      }
+    }
+  },
+  "fallbackLimitId": {
+    "rateLimits": [
+      {"limitId": "other"},
+      {
+        "limitId": "codex",
+        "primary": {"windowDurationMins": 300, "usedPercent": 80},
+        "secondary": {"windowDurationMins": 10080, "usedPercent": 10}
+      }
+    ]
+  },
+  "malformed": {
+    "rateLimitsByLimitId": {
+      "codex": {
+        "limitId": "codex",
+        "primary": {"windowDurationMins": 300, "usedPercent": "not-a-number"},
+        "secondary": {"windowDurationMins": 10080, "usedPercent": 5}
+      }
+    }
+  },
+  "apiKeyAuth": "Using API key authentication",
+  "unauthenticated": "Not logged in",
+  "timeout": "Codex app-server refresh timed out.",
+  "rateLimited": {"id": 2, "error": {"message": "rate limit 429"}}
+}

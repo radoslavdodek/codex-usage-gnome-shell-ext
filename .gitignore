@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.log
+.env*
+.vscode/
+.idea/
+
+schemas/gschemas.compiled
+*.zip

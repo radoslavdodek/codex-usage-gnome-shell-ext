@@ -1,0 +1,62 @@
+.codex-usage-panel {
+  spacing: 4px;
+}
+
+.codex-usage-panel-box {
+  spacing: 4px;
+}
+
+.codex-usage-panel-label {
+  font-weight: 600;
+}
+
+.codex-usage-panel-loading .codex-usage-panel-label,
+.codex-usage-panel-stale .codex-usage-panel-label {
+  color: #deddda;
+}
+
+.codex-usage-panel-normal .codex-usage-panel-label {
+  color: #8ff0a4;
+}
+
+.codex-usage-panel-warning .codex-usage-panel-label {
+  color: #f8e45c;
+}
+
+.codex-usage-panel-limit-reached .codex-usage-panel-label,
+.codex-usage-panel-error .codex-usage-panel-label {
+  color: #ff7b63;
+}
+
+.codex-usage-panel-not-authenticated .codex-usage-panel-label,
+.codex-usage-panel-not-configured .codex-usage-panel-label {
+  color: #99c1f1;
+}
+
+.codex-usage-bucket-row {
+  padding: 8px 0;
+}
+
+.codex-usage-bucket-title {
+  font-weight: 600;
+}
+
+.codex-usage-bucket-value {
+  font-weight: 700;
+  text-align: right;
+}
+
+.codex-usage-bucket-meta,
+.codex-usage-state-row {
+  color: #c0bfbc;
+  font-size: 0.9em;
+}
+
+.codex-usage-message-row {
+  color: #ffbe6f;
+  font-size: 0.9em;
+}
+
+.codex-usage-action-row {
+  font-weight: 600;
+}
