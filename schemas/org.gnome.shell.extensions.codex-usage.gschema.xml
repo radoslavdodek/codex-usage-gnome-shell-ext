@@ -18,7 +18,7 @@
     </key>
     <key name="refresh-interval-seconds" type="i">
       <range min="300" max="86400"/>
-      <default>1800</default>
+      <default>300</default>
       <summary>Automatic refresh interval</summary>
       <description>Seconds between automatic refresh attempts.</description>
     </key>
