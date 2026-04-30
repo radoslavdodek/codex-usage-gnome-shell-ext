@@ -98,6 +98,8 @@ const malformedBucket = normalizeCodexRateLimitsPayload({
 }, options);
 assertEqual(malformedBucket.fiveHour.status, BUCKET_STATUSES.ERROR, 'malformed bucket status');
 assertEqual(malformedBucket.weekly.percentRemaining, 60, 'valid sibling bucket preserved');
+assertEqual(malformedBucket.overallStatus, OVERALL_STATUSES.ERROR, 'malformed sibling keeps overall error state');
+assertEqual(malformedBucket.displayText, 'Codex Error', 'malformed sibling panel text');
 
 const rpcText = [
     JSON.stringify({id: 1, result: {ok: true}}),
@@ -164,5 +166,10 @@ const second = source.refresh(null, options);
 assert(first === second, 'mock source does not start overlapping refreshes');
 const snapshot = await first;
 assertEqual(snapshot.overallStatus, OVERALL_STATUSES.NORMAL, 'mock source refresh result');
+
+const failureSource = new MockBalanceSource({mockScenario: 'timeout'});
+const failureSnapshot = await failureSource.refresh(null, options);
+assertEqual(failureSnapshot.overallStatus, OVERALL_STATUSES.ERROR, 'mock failure snapshot maps to error');
+assertEqual(failureSource.status, REFRESH_STATES.TIMED_OUT, 'mock source status tracks failure kind');
 
 print('balance source tests passed');

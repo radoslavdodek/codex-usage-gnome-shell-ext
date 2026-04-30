@@ -81,16 +81,18 @@ CODEX_COMMAND=/home/rado/.nvm/versions/node/v20.19.6/bin/codex gjs -m tests/live
 
 Result in this workspace with network access enabled for the probe:
 
-- `overallStatus`: `normal`
-- `displayText`: `5h 34%`
-- `fiveHourPercentRemaining`: `34`
-- `weeklyPercentRemaining`: `81`
+- `overallStatus`: `warning`
+- `displayText`: `5h 22%`
+- `fiveHourPercentRemaining`: `22`
+- `weeklyPercentRemaining`: `79`
 - `errorMessage`: `null`
 
 ## Manual GNOME Shell Checklist
 
-Status for this implementation pass: pending live GNOME Shell verification. The
-workspace can run GJS tests, but it is not a running GNOME Shell session.
+Status for this implementation pass: partially verified on GNOME Shell 46.0.
+Non-Shell tests, package scope, the live Codex app-server source, and
+enable/disable lifecycle checks passed. Visual panel/menu inspection, Shell
+reload, suspend/resume, and GNOME Shell 47-49 smoke checks remain pending.
 
 - Install extension locally.
 - Enable extension and confirm exactly one indicator appears.
@@ -127,6 +129,17 @@ workspace can run GJS tests, but it is not a running GNOME Shell session.
 - Failed refresh after a successful snapshot preserves previous values and marks them stale.
 - Automatic refresh uses the configured interval and source timeout.
 
+### Refresh Behavior Verification Record
+
+Last run in this workspace: 2026-04-30.
+
+- `tests/run-tests.sh`: PASS for no-overlap, stale-after, timeout, failed-with-previous, malformed, and rate-limited refresh handling.
+- Live provider command: `CODEX_COMMAND=/home/rado/.nvm/versions/node/v20.19.6/bin/codex gjs -m tests/liveCodexProbe.js`.
+- Codex CLI: `codex-cli 0.125.0`.
+- Auth preflight: `codex login status` reported ChatGPT login.
+- Live provider result with network access enabled: `overallStatus` `warning`, `displayText` `5h 22%`, 5-hour remaining `22`, weekly remaining `79`, `errorMessage` `null`.
+- Manual refresh, slow-source, failed-source, no-overlap, and stale-data UI behavior still requires visual confirmation in the Shell menu.
+
 ### Source Problem Expected Outcomes
 
 - Missing ChatGPT login maps to `not-authenticated`.
@@ -135,14 +148,28 @@ workspace can run GJS tests, but it is not a running GNOME Shell session.
 - Malformed payload maps to error without crashing and without exposing raw payloads.
 - Provider stdout, stderr, JSON-RPC errors, and thrown errors are redacted before UI display.
 
+### Source Problem Verification Record
+
+Last run in this workspace: 2026-04-30.
+
+- `tests/run-tests.sh`: PASS for not-authenticated, not-configured, wrong-auth-mode, malformed, rate-limited, timeout, and generic error snapshot mapping.
+- `tests/run-tests.sh`: PASS for authorization header, cookie, bearer token, token-like value, account identifier, email, high-entropy string, raw-fragment, and long-payload redaction.
+- Live sandboxed provider probe without network access returned a sanitized error state and no bucket values.
+- Live provider probe with network access enabled returned a successful ChatGPT-authenticated snapshot with no error message.
+- Visual source-problem states in the panel and dropdown still require live Shell menu inspection.
+
 ### Lifecycle Evidence
 
-Pending live verification:
+Last run in this workspace: 2026-04-30.
 
-- 10 enable/disable cycles.
-- GNOME Shell reload.
-- Suspend/resume.
-- GNOME Shell 46, 47, 48, and 49 compatibility smoke checks.
+- Environment: GNOME Shell 46.0, `gnome-extensions` 46.0, GJS 1.80.2.
+- Installed local extension: `codex-usage@rado`, version 2, state `ACTIVE`.
+- 10 enable/disable cycles through `gnome-extensions disable codex-usage@rado` and `gnome-extensions enable codex-usage@rado`: PASS; final state `Enabled: Yes`, `State: ACTIVE`.
+- Package scope check: PASS. `gnome-extensions pack` produced an archive containing only runtime files: metadata, schema XML, `lib/*.js`, `stylesheet.css`, `prefs.js`, and `extension.js`.
+- GNOME Shell reload: not run in this pass to avoid disrupting the active desktop session.
+- Suspend/resume: not run in this pass.
+- GNOME Shell 46 compatibility smoke check: partial PASS for active extension state and lifecycle command checks; visual inspection remains pending.
+- GNOME Shell 47, 48, and 49 compatibility smoke checks: not run in this workspace.
 
 ## Release Gate
 

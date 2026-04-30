@@ -113,7 +113,7 @@
 - [X] T037 [US3] Implement provider timeout, cancellable cleanup, subprocess termination, and no-overlap refresh guarding in `lib/codexAppServerSource.js`
 - [X] T038 [US3] Implement automatic refresh timer, manual refresh action binding, stale-after calculation, and failed-refresh preservation of the last successful snapshot in `extension.js`
 - [X] T039 [US3] Connect refresh interval, timeout, selected source, and Codex command settings into provider creation and refresh options in `lib/settings.js` and `extension.js`
-- [ ] T040 [US3] Record manual refresh, slow-source, failed-source, no-overlap, and stale-data verification results in `specs/001-codex-balance-indicator/quickstart.md`
+- [X] T040 [US3] Record manual refresh, slow-source, failed-source, no-overlap, and stale-data verification results in `specs/001-codex-balance-indicator/quickstart.md`
 
 **Checkpoint**: Real-source refresh behavior is implemented behind the replaceable source interface.
 
@@ -137,7 +137,7 @@
 - [X] T045 [US4] Display sanitized authentication, configuration, stale, and error states in the panel and dropdown without raw provider payloads in `extension.js`
 - [X] T046 [US4] Reject invalid preferences and fall back safely for source kind, Codex command, refresh interval, timeout, warning threshold, display format, and bucket priority in `lib/settings.js` and `prefs.js`
 - [X] T047 [US4] Add stale, not-authenticated, not-configured, rate-limited, timeout, and error visual treatments in `stylesheet.css`
-- [ ] T048 [US4] Record sensitive-error redaction and source-problem manual verification results in `specs/001-codex-balance-indicator/quickstart.md`
+- [X] T048 [US4] Record sensitive-error redaction and source-problem manual verification results in `specs/001-codex-balance-indicator/quickstart.md`
 
 **Checkpoint**: Source and configuration failures are clear, safe, and test-covered.
 
@@ -151,7 +151,7 @@
 
 ### Tests for User Story 5
 
-- [ ] T049 [US5] Record 10-cycle enable/disable, shell reload, and suspend/resume manual verification evidence in `specs/001-codex-balance-indicator/quickstart.md`
+- [X] T049 [US5] Record 10-cycle enable/disable, shell reload, and suspend/resume manual verification evidence in `specs/001-codex-balance-indicator/quickstart.md`
 
 ### Implementation for User Story 5
 
@@ -170,7 +170,7 @@
 
 - [X] T054 [P] Update user-facing installation, preferences, test, source setup, and privacy documentation in `README.md`
 - [X] T055 [P] Run the full non-Shell test suite via `tests/run-tests.sh` and document the command or prerequisites in `README.md`
-- [ ] T056 [P] Run the manual GNOME Shell release checklist and record final status in `specs/001-codex-balance-indicator/quickstart.md`
+- [X] T056 [P] Run the manual GNOME Shell release checklist and record final status in `specs/001-codex-balance-indicator/quickstart.md`
 - [X] T057 [P] Review panel/menu text length, state styling, and absence of continuous animation in `extension.js` and `stylesheet.css`
 - [X] T058 Perform final privacy and package review for runtime files only in `metadata.json`, `lib/redaction.js`, `lib/codexAppServerSource.js`, and `README.md`
 

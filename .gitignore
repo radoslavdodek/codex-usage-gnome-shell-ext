@@ -4,6 +4,9 @@ Thumbs.db
 *.swp
 *.log
 .env*
+node_modules/
+dist/
+build/
 .vscode/
 .idea/
 
