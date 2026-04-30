@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Create a feature specification for the first release of Codex Usage Indicator, a GNOME Shell extension that displays the same Codex Balance usage data shown on https://chatgpt.com/codex/cloud/settings/analytics#usage in the GNOME top bar."
 
+## Clarifications
+
+### Session 2026-04-30
+
+- Q: What should determine whether the first release is complete if no stable source exists yet? → A: First release is not complete until a real source path is verified and planned.
+- Q: When should previously successful Balance data become stale by age? → A: Data becomes stale after 2x the configured automatic refresh interval without a successful refresh.
+- Q: How should the first release handle multiple ChatGPT workspaces or accounts? → A: Use the selected source's default authenticated context; no workspace selection in first release.
+- Q: Which GNOME Shell versions should the first release support? → A: GNOME Shell 46 through 49.
+- Q: How should bucket reset times be displayed? → A: Display reset times in the user's local timezone using GNOME/locale formatting.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Glance at Current Balance (Priority: P1)
@@ -133,9 +143,9 @@ As a user who enables, disables, reloads, or updates the extension, I want it to
 - **FR-019**: Bucket statuses MUST support normal, warning, limit reached, stale, unavailable, and error.
 - **FR-020**: Overall statuses MUST support loading, normal, warning, limit reached, stale, not authenticated, not configured, and error.
 - **FR-021**: Default status mapping MUST treat more than 25% remaining as normal, 1% through 25% remaining as warning, and 0% remaining as limit reached unless the user configures a different threshold.
-- **FR-022**: Stale status MUST be used when a last successful Balance snapshot exists but a later refresh fails or becomes too old to trust.
+- **FR-022**: Stale status MUST be used when a last successful Balance snapshot exists but a later refresh fails or no successful refresh has occurred for 2x the configured automatic refresh interval.
 - **FR-023**: If no official or stable machine-readable source for exact Balance data is available, the first release plan MUST explicitly document that limitation and keep the source replaceable.
-- **FR-024**: A development-only mock source MAY be used for verification, but the feature MUST NOT be considered complete until a real source path is selected and planned.
+- **FR-024**: A development-only mock source MAY be used for verification, but the feature MUST NOT be considered complete until a real source path is verified, selected, and planned.
 - **FR-025**: If the selected source requires ChatGPT authentication, the extension MUST handle unauthenticated sessions without storing or exposing credentials.
 - **FR-026**: If the selected source reads from the ChatGPT Codex analytics usage page, it MUST handle absent Balance sections, changed structure, unauthenticated sessions, parse failures, and sensitive data redaction.
 - **FR-027**: If the selected source uses a local Codex command, the plan MUST verify that the command exposes the same 5-hour and weekly Balance data before relying on it.
@@ -145,8 +155,11 @@ As a user who enables, disables, reloads, or updates the extension, I want it to
 - **FR-031**: Provider errors shown to users or logs MUST be sanitized.
 - **FR-032**: Optional preferences MAY include refresh interval, warning threshold, top-bar display format, selected source, source-specific local command path, and whether the panel prioritizes 5-hour, weekly, or lowest remaining value.
 - **FR-033**: Defaults MUST be safe and useful, and invalid preferences MUST be rejected or handled gracefully.
-- **FR-034**: The first release MUST include a manual verification checklist covering install, enable, disable, reload, missing configuration, failed refresh, stale data, normal data, manual refresh, and sensitive error redaction.
-- **FR-035**: The extension package MUST include only files required for the implemented first-release functionality.
+- **FR-034**: The first release MUST use the selected source's default authenticated ChatGPT context and MUST NOT require workspace or account selection.
+- **FR-035**: The first release MUST target GNOME Shell versions 46 through 49.
+- **FR-036**: The first release MUST include a manual verification checklist covering install, enable, disable, reload, missing configuration, failed refresh, stale data, normal data, manual refresh, sensitive error redaction, and compatibility with GNOME Shell versions 46 through 49.
+- **FR-037**: The extension package MUST include only files required for the implemented first-release functionality.
+- **FR-038**: Reset times MUST be displayed in the user's local timezone using GNOME or system locale formatting when the source provides parseable time data.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -162,7 +175,7 @@ As a user who enables, disables, reloads, or updates the extension, I want it to
 
 - **SC-001**: In a normal data state, a user can identify whether Codex Balance is normal, warning, or limit reached from the top bar in under 5 seconds without opening ChatGPT, a terminal, or another dashboard.
 - **SC-002**: In a detailed data state, a user can open the menu and confirm both 5-hour and weekly remaining percentages and reset times in under 10 seconds.
-- **SC-003**: Manual verification covers at least these paths before release: install, enable, disable, shell reload, missing configuration, unauthenticated source, failed refresh, stale data, malformed data, normal data, manual refresh, repeated enable/disable, and sensitive error redaction.
+- **SC-003**: Manual verification covers at least these paths before release: install, enable, disable, shell reload, missing configuration, unauthenticated source, failed refresh, stale data, malformed data, normal data, manual refresh, repeated enable/disable, sensitive error redaction, and compatibility with GNOME Shell versions 46 through 49.
 - **SC-004**: Repeated enable/disable testing across at least 10 cycles produces no duplicate indicators, duplicate timers, stale refresh work, lingering source operations, or user-visible crashes.
 - **SC-005**: Representative malformed, unavailable, unauthenticated, rate-limited, and timeout source states all produce a clear non-crashing user-visible state.
 - **SC-006**: Failed refresh after a previous success keeps the last successful Balance values visible and marks them stale or failed in 100% of tested failure cases.
@@ -178,8 +191,8 @@ As a user who enables, disables, reloads, or updates the extension, I want it to
 - A mock source is acceptable for development and verification but not sufficient for a complete first release.
 - The default warning threshold is 25% because it gives users time to react before reaching a limit while keeping the top-bar state calm during normal usage.
 - The default panel priority is the lowest remaining percentage because it best represents the user's most constrained Codex Balance bucket.
-- Automatic refresh should be conservative by default; the exact interval and timeout belong in the implementation plan after source behavior is known.
+- Automatic refresh should be conservative by default; the exact interval and timeout belong in the implementation plan after source behavior is known, and stale-age handling is based on 2x the configured interval.
 - Preferences are optional for the first release unless the chosen source or safe defaults require user configuration.
-- Multiple ChatGPT workspaces are handled by the selected source's default authenticated context for the first release unless implementation planning identifies a safe, user-controllable workspace selection path.
+- Multiple ChatGPT workspaces are handled by the selected source's default authenticated context for the first release; workspace or account selection is out of scope for the first release.
 - Notifications are disabled by default; failures are communicated through the indicator and menu.
-- The implementation plan must decide supported GNOME Shell versions, source path, default top-bar text format, refresh timeout, refresh interval, reset-time localization behavior, and the minimum manual test matrix.
+- The implementation plan must decide source path, default top-bar text format, refresh timeout, refresh interval, unparseable reset-time fallback behavior, and the minimum manual test matrix for GNOME Shell versions 46 through 49.
