@@ -33,9 +33,9 @@
 
 ## Default Polling and Timeout
 
-**Decision**: Default automatic refresh interval is 30 minutes, minimum configurable interval is 5 minutes, and provider refresh timeout is 15 seconds. Data becomes stale after 2x the configured refresh interval without a successful refresh.
+**Decision**: Default automatic refresh interval is 5 minutes, minimum configurable interval is 5 minutes, and provider refresh timeout is 15 seconds. Data becomes stale after 2x the configured refresh interval without a successful refresh.
 
-**Rationale**: Balance data is useful when reasonably fresh but does not need aggressive polling. A 30-minute default keeps wakeups and source pressure low. The 15-second timeout prevents hung provider work from making the extension appear permanently loading.
+**Rationale**: Balance data is useful when reasonably fresh but does not need aggressive polling. A 5-minute default matches the current GSettings schema and keeps stale detection predictable. The 15-second timeout prevents hung provider work from making the extension appear permanently loading.
 
 **Alternatives considered**:
 

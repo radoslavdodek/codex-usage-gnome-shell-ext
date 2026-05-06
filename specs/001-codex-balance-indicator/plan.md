@@ -16,7 +16,7 @@ Build a GNOME Shell 46-49 extension that shows current Codex Balance usage in th
 **Testing**: Non-Shell GJS tests for normalization, status mapping, stale handling, command-output parsing, ChatGPT-auth/API-key rejection, and redaction; manual GNOME Shell checklist for lifecycle and UI behavior  
 **Target Platform**: GNOME Shell on Linux, versions 46-49  
 **Project Type**: GNOME Shell extension  
-**Performance Goals**: Default refresh interval 30 minutes, minimum configurable interval 5 minutes, app-server refresh timeout 15 seconds, no overlapping refreshes, no synchronous I/O on the Shell UI path  
+**Performance Goals**: Default refresh interval 5 minutes, minimum configurable interval 5 minutes, app-server refresh timeout 15 seconds, no overlapping refreshes, no synchronous I/O on the Shell UI path  
 **Constraints**: No UI/signals/timers/external access before `enable()`; full cleanup in `disable()`; no telemetry; no third-party transmission; source work must be cancellable and sanitized  
 **Scale/Scope**: Single-user local top-bar indicator with dropdown details and optional preferences
 

@@ -90,7 +90,7 @@ Represents source-specific configuration and safe polling settings.
 
 **Validation rules**:
 
-- `refreshIntervalSeconds` must be at least 300; invalid values fall back to 1800.
+- `refreshIntervalSeconds` defaults to 300 and must be at least 300; invalid values fall back to the implementation default.
 - `timeoutSeconds` defaults to 15 and must be shorter than refresh interval.
 - `warningThresholdPercent` defaults to 25.
 - `codexCommand` defaults to `codex` and is required for `codex-app-server`.

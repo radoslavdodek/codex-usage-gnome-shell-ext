@@ -92,7 +92,7 @@ Preferences are stored with GSettings under
 - Source: mock data or Codex app-server.
 - Mock scenario for local UI checks.
 - Codex command path, default `codex`.
-- Refresh interval, default 1800 seconds, minimum 300 seconds.
+- Refresh interval, default 300 seconds, minimum 300 seconds.
 - Provider timeout, default 15 seconds.
 - Warning threshold, default 25%.
 - Panel display format: bucket plus percent, percent only, or state label.
