@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*.log
+.env*
+node_modules/
+dist/
+build/
+.vscode/
+.idea/
+
+schemas/gschemas.compiled
+*.zip

@@ -1,0 +1,19 @@
+{
+  "successful": {
+    "fiveHour": {"percentRemaining": 87, "resetAtUnix": 1770003600},
+    "weekly": {"percentRemaining": 95, "resetAtUnix": 1770300000}
+  },
+  "partialBucket": {
+    "fiveHour": {"status": "unavailable", "message": "5-hour data unavailable"},
+    "weekly": {"percentRemaining": 64, "resetText": "tomorrow"}
+  },
+  "stale": {
+    "fiveHour": {"percentRemaining": 42, "status": "stale", "resetAtUnix": 1770003600},
+    "weekly": {"percentRemaining": 88, "status": "stale", "resetAtUnix": 1770300000}
+  },
+  "error": {
+    "errorMessage": "Unable to refresh Codex Balance.",
+    "fiveHour": {"status": "error", "message": "Unable to parse 5-hour bucket"},
+    "weekly": {"status": "error", "message": "Unable to parse weekly bucket"}
+  }
+}

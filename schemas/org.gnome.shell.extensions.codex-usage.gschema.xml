@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.codex-usage" path="/org/gnome/shell/extensions/codex-usage/">
+    <key name="source-kind" type="s">
+      <default>'codex-app-server'</default>
+      <summary>Selected Balance data source</summary>
+      <description>Allowed values are mock and codex-app-server.</description>
+    </key>
+    <key name="mock-scenario" type="s">
+      <default>'normal'</default>
+      <summary>Mock source scenario</summary>
+      <description>Scenario used by the development mock source.</description>
+    </key>
+    <key name="codex-command" type="s">
+      <default>'codex'</default>
+      <summary>Codex CLI command</summary>
+      <description>Executable path for the Codex CLI used by the app-server source.</description>
+    </key>
+    <key name="refresh-interval-seconds" type="i">
+      <range min="300" max="86400"/>
+      <default>300</default>
+      <summary>Automatic refresh interval</summary>
+      <description>Seconds between automatic refresh attempts.</description>
+    </key>
+    <key name="timeout-seconds" type="i">
+      <range min="5" max="300"/>
+      <default>15</default>
+      <summary>Provider timeout</summary>
+      <description>Seconds to wait for a provider refresh before timing out.</description>
+    </key>
+    <key name="warning-threshold-percent" type="i">
+      <range min="1" max="99"/>
+      <default>25</default>
+      <summary>Warning threshold</summary>
+      <description>Percent remaining at or below which a bucket is shown as warning.</description>
+    </key>
+    <key name="display-format" type="s">
+      <default>'bucket-percent'</default>
+      <summary>Panel display format</summary>
+      <description>Allowed values are bucket-percent, percent-only, and state-label.</description>
+    </key>
+    <key name="bucket-priority" type="s">
+      <default>'lowest'</default>
+      <summary>Panel bucket priority</summary>
+      <description>Allowed values are lowest, five-hour, and weekly.</description>
+    </key>
+  </schema>
+</schemalist>
