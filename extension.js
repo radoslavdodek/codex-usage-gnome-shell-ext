@@ -104,7 +104,7 @@ export default class CodexUsageExtension extends Extension {
         addPanelIndicator(Main, INDICATOR_ID, this._indicator, 0, 'right');
         this._renderLoading();
         this._scheduleRefreshTimer();
-        this._refresh(false);
+        this._refresh();
     }
 
     disable() {
@@ -148,7 +148,7 @@ export default class CodexUsageExtension extends Extension {
 
         this._scheduleRefreshTimer();
         this._render(this._snapshot ? withDisplayFields(this._snapshot, this._config) : null);
-        this._refresh(false);
+        this._refresh();
     }
 
     _scheduleRefreshTimer() {
@@ -156,7 +156,7 @@ export default class CodexUsageExtension extends Extension {
             removeSource(this._refreshTimerId);
 
         this._refreshTimerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, this._config.refreshIntervalSeconds, () => {
-            this._refresh(false);
+            this._refresh();
             return GLib.SOURCE_CONTINUE;
         });
     }
@@ -173,6 +173,14 @@ export default class CodexUsageExtension extends Extension {
         });
     }
 
+    _renderRefreshing() {
+        const snapshot = this._effectiveSnapshot(this._snapshot);
+        if (snapshot)
+            this._render({...snapshot, detailText: 'Refreshing Codex Balance'});
+        else
+            this._renderLoading();
+    }
+
     _effectiveSnapshot(snapshot) {
         if (!snapshot)
             return null;
@@ -182,14 +190,11 @@ export default class CodexUsageExtension extends Extension {
         return withDisplayFields(snapshot, this._config);
     }
 
-    _refresh(manual) {
+    _refresh() {
         if (this._refreshPromise)
             return this._refreshPromise;
 
         this._refreshCancellable = new Gio.Cancellable();
-        if (manual && this._indicator)
-            this._render({...this._effectiveSnapshot(this._snapshot), detailText: 'Refreshing Codex Balance'});
-
         this._refreshPromise = this._source.refresh(this._refreshCancellable, this._config)
             .then(snapshot => {
                 let effective = snapshot;
@@ -200,18 +205,19 @@ export default class CodexUsageExtension extends Extension {
                 }
 
                 this._snapshot = effective;
-                this._render(this._effectiveSnapshot(effective));
             })
             .catch(error => {
                 const message = error?.message ?? 'Unable to refresh Codex Balance.';
                 if (this._lastSuccessfulSnapshot)
                     this._snapshot = markSnapshotStale(this._lastSuccessfulSnapshot, message);
-                this._render(this._effectiveSnapshot(this._snapshot));
             })
             .finally(() => {
                 this._refreshPromise = null;
                 this._refreshCancellable = null;
+                this._render(this._effectiveSnapshot(this._snapshot));
             });
+
+        this._renderRefreshing();
 
         return this._refreshPromise;
     }
@@ -263,7 +269,7 @@ export default class CodexUsageExtension extends Extension {
         const action = new PopupMenu.PopupMenuItem(this._refreshPromise ? 'Refreshing...' : 'Refresh Now');
         action.add_style_class_name('codex-usage-action-row');
         action.setSensitive(!this._refreshPromise);
-        action.connect('activate', () => this._refresh(true));
+        action.connect('activate', () => this._refresh());
         this._indicator.menu.addMenuItem(action);
     }
 
