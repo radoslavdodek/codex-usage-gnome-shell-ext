@@ -1,7 +1,10 @@
 # Codex Usage Indicator
 
-GNOME Shell 46-49 extension that shows Codex Balance usage in the top bar and
-details in a dropdown menu.
+GNOME Shell 46, 47, 48, 49, and 50 extension that shows Codex Balance
+usage in the top bar and details in a dropdown menu. This feature's
+verification scope is bounded through GNOME Shell 50.1 as the highest point
+release in scope. Versions newer than GNOME Shell 50.1 are not verified by
+this feature.
 
 The extension defaults to the real `codex-app-server` source and also ships
 with a mock source for development. The real source uses the installed Codex
@@ -171,7 +174,8 @@ The expected archive is
 
 ## Manual Release Checks
 
-Before release, verify in live GNOME Shell 46, 47, 48, and 49:
+Before an unqualified release, verify the full compatibility checklist in live
+GNOME Shell 50 and 50.1:
 
 - Exactly one indicator appears after enable.
 - The menu shows both Balance buckets, freshness, state, sanitized messages,
@@ -182,5 +186,24 @@ Before release, verify in live GNOME Shell 46, 47, 48, and 49:
   timeout, stale, and generic error states are distinct and sanitized.
 - Disable, reload, suspend/resume, and 10 enable/disable cycles leave no
   duplicate indicators, timers, signal handlers, or provider work.
+
+Also verify the regression smoke checklist in live GNOME Shell 46, 47, 48, and
+49:
+
+- Install the runtime package.
+- Exactly one indicator appears after enable.
+- Normal data display matches the existing behavior.
+- Manual refresh works.
+- Disable removes the indicator and stops owned activity.
+- Shell reload or session restart does not regress existing behavior.
+
+For every target version:
+
 - The release package contains only runtime files and no credentials, raw
   payloads, generated artifacts, or unrelated project files.
+
+Current release verification limitation for this feature: any GNOME Shell
+version or behavior check recorded as `blocked` in
+`specs/002-gnome-50-compatibility/verification-record.md` remains unverified.
+An unqualified release requires replacing blocked rows with pass evidence, or
+publishing the release with that explicit limitation.

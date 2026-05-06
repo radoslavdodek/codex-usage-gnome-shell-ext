@@ -15,10 +15,10 @@
 
 **Purpose**: Establish the current compatibility surfaces and verification artifacts before changing release scope.
 
-- [ ] T001 Inspect current compatibility declarations in `metadata.json` and `README.md` against `specs/002-gnome-50-compatibility/contracts/compatibility-support.md`
-- [ ] T002 [P] Review the required version/check matrix in `specs/002-gnome-50-compatibility/contracts/verification-record.md`
-- [ ] T003 Create the release verification record scaffold in `specs/002-gnome-50-compatibility/verification-record.md`
-- [ ] T004 [P] Create sanitized evidence file guidance in `specs/002-gnome-50-compatibility/evidence/README.md`
+- [X] T001 Inspect current compatibility declarations in `metadata.json` and `README.md` against `specs/002-gnome-50-compatibility/contracts/compatibility-support.md`
+- [X] T002 [P] Review the required version/check matrix in `specs/002-gnome-50-compatibility/contracts/verification-record.md`
+- [X] T003 Create the release verification record scaffold in `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T004 [P] Create sanitized evidence file guidance in `specs/002-gnome-50-compatibility/evidence/README.md`
 
 ---
 
@@ -28,11 +28,11 @@
 
 **Critical**: No user story verification can begin until the runtime package reflects the updated metadata.
 
-- [ ] T005 Update `metadata.json` `shell-version` to `["46", "47", "48", "49", "50"]` without adding `50.1`, `50.2`, or `51`
-- [ ] T006 Validate `metadata.json` remains valid JSON with `uuid`, `name`, `description`, `settings-schema`, and `shell-version` matching `specs/002-gnome-50-compatibility/contracts/compatibility-support.md`
-- [ ] T007 Run `tests/run-tests.sh` and record the sanitized `non-shell-tests` result in `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md`
-- [ ] T008 Build the runtime archive with the `gnome-extensions pack` command from `specs/002-gnome-50-compatibility/quickstart.md` and record the package path in `specs/002-gnome-50-compatibility/evidence/package-build.md`
-- [ ] T009 Inspect `/tmp/codex-usage-pack/codex-usage@rado.shell-extension.zip` against the package contract and record `package-scope` in `specs/002-gnome-50-compatibility/evidence/package-scope.md`
+- [X] T005 Update `metadata.json` `shell-version` to `["46", "47", "48", "49", "50"]` without adding `50.1`, `50.2`, or `51`
+- [X] T006 Validate `metadata.json` remains valid JSON with `uuid`, `name`, `description`, `settings-schema`, and `shell-version` matching `specs/002-gnome-50-compatibility/contracts/compatibility-support.md`
+- [X] T007 Run `tests/run-tests.sh` and record the sanitized `non-shell-tests` result in `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md`
+- [X] T008 Build the runtime archive with the `gnome-extensions pack` command from `specs/002-gnome-50-compatibility/quickstart.md` and record the package path in `specs/002-gnome-50-compatibility/evidence/package-build.md`
+- [X] T009 Inspect `/tmp/codex-usage-pack/codex-usage@rado.shell-extension.zip` against the package contract and record `package-scope` in `specs/002-gnome-50-compatibility/evidence/package-scope.md`
 
 **Checkpoint**: Metadata, non-Shell tests, and runtime package are ready for Shell version verification.
 
@@ -46,13 +46,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Run the full GNOME Shell 50 checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md`
-- [ ] T011 [P] [US1] Run the full GNOME Shell 50.1 checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md`
+- [X] T010 [P] [US1] Run the full GNOME Shell 50 checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md`
+- [X] T011 [P] [US1] Run the full GNOME Shell 50.1 checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] If GNOME Shell 50 or 50.1 evidence shows an extension API failure, patch lifecycle or UI compatibility in `extension.js` and `lib/compatibility.js`, then rerun the failed checks recorded in `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md` or `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md`
-- [ ] T013 [US1] Merge GNOME Shell 50 and 50.1 pass/fail/blocked rows into `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T012 [US1] If GNOME Shell 50 or 50.1 evidence shows an extension API failure, patch lifecycle or UI compatibility in `extension.js` and `lib/compatibility.js`, then rerun the failed checks recorded in `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md` or `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md`
+- [X] T013 [US1] Merge GNOME Shell 50 and 50.1 pass/fail/blocked rows into `specs/002-gnome-50-compatibility/verification-record.md`
 
 **Checkpoint**: User Story 1 is independently complete when GNOME Shell 50 and 50.1 rows are pass or explicitly blocked with a documented limitation.
 
@@ -66,15 +66,15 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Run the GNOME Shell 46 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`
-- [ ] T015 [P] [US2] Run the GNOME Shell 47 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`
-- [ ] T016 [P] [US2] Run the GNOME Shell 48 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`
-- [ ] T017 [P] [US2] Run the GNOME Shell 49 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`
+- [X] T014 [P] [US2] Run the GNOME Shell 46 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`
+- [X] T015 [P] [US2] Run the GNOME Shell 47 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`
+- [X] T016 [P] [US2] Run the GNOME Shell 48 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`
+- [X] T017 [P] [US2] Run the GNOME Shell 49 regression smoke checklist from `specs/002-gnome-50-compatibility/quickstart.md` and write sanitized outcomes to `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] If GNOME Shell 46 through 49 evidence shows a regression, patch only the impacted compatibility surface in `metadata.json`, `extension.js`, or `lib/compatibility.js`, then rerun and update `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`, or `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`
-- [ ] T019 [US2] Merge GNOME Shell 46, 47, 48, and 49 regression rows into `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T018 [US2] If GNOME Shell 46 through 49 evidence shows a regression, patch only the impacted compatibility surface in `metadata.json`, `extension.js`, or `lib/compatibility.js`, then rerun and update `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`, or `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`
+- [X] T019 [US2] Merge GNOME Shell 46, 47, 48, and 49 regression rows into `specs/002-gnome-50-compatibility/verification-record.md`
 
 **Checkpoint**: User Story 2 is independently complete when all existing-version regression rows are pass or explicitly blocked with a documented limitation.
 
@@ -88,15 +88,15 @@
 
 ### Tests for User Story 3
 
-- [ ] T020 [US3] Review `metadata.json` and `README.md` for unsupported `50.2`, `51`, or newer-version claims and record `docs-version-bound` in `specs/002-gnome-50-compatibility/verification-record.md`
-- [ ] T021 [US3] Review `specs/002-gnome-50-compatibility/verification-record.md` for every required version/check row from `specs/002-gnome-50-compatibility/contracts/verification-record.md`
+- [X] T020 [US3] Review `metadata.json` and `README.md` for unsupported `50.2`, `51`, or newer-version claims and record `docs-version-bound` in `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T021 [US3] Review `specs/002-gnome-50-compatibility/verification-record.md` for every required version/check row from `specs/002-gnome-50-compatibility/contracts/verification-record.md`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Update the opening compatibility wording in `README.md` to state GNOME Shell 46, 47, 48, 49, and 50 support with verification through GNOME Shell 50.1
-- [ ] T023 [US3] Update the manual release checks in `README.md` to separate full GNOME Shell 50/50.1 checks from GNOME Shell 46 through 49 regression smoke checks
-- [ ] T024 [US3] Add the final release readiness summary with `highestVerifiedPointRelease: 50.1` to `specs/002-gnome-50-compatibility/verification-record.md`
-- [ ] T025 [US3] If any targeted version or check is blocked, document the unverified version, missing check, reason, and release limitation in `README.md` and `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T022 [US3] Update the opening compatibility wording in `README.md` to state GNOME Shell 46, 47, 48, 49, and 50 support with verification through GNOME Shell 50.1
+- [X] T023 [US3] Update the manual release checks in `README.md` to separate full GNOME Shell 50/50.1 checks from GNOME Shell 46 through 49 regression smoke checks
+- [X] T024 [US3] Add the final release readiness summary with `highestVerifiedPointRelease: 50.1` to `specs/002-gnome-50-compatibility/verification-record.md`
+- [X] T025 [US3] If any targeted version or check is blocked, document the unverified version, missing check, reason, and release limitation in `README.md` and `specs/002-gnome-50-compatibility/verification-record.md`
 
 **Checkpoint**: User Story 3 is independently complete when docs and verification evidence agree on the supported range and the 50.1 upper verification bound.
 
@@ -106,10 +106,10 @@
 
 **Purpose**: Final validation, package hygiene, and privacy review across all stories.
 
-- [ ] T026 Review `specs/002-gnome-50-compatibility/verification-record.md`, `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md`, `specs/002-gnome-50-compatibility/evidence/package-build.md`, `specs/002-gnome-50-compatibility/evidence/package-scope.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md`, and `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md` for credentials, tokens, cookies, authorization headers, account identifiers, and raw provider payloads
-- [ ] T027 Run final `tests/run-tests.sh` and update `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md` with the final sanitized result
-- [ ] T028 Rebuild `/tmp/codex-usage-pack/codex-usage@rado.shell-extension.zip` and update `specs/002-gnome-50-compatibility/evidence/package-build.md` plus `specs/002-gnome-50-compatibility/evidence/package-scope.md`
-- [ ] T029 Verify `metadata.json`, `README.md`, and `specs/002-gnome-50-compatibility/verification-record.md` all avoid claims for GNOME Shell 50.2, 51, or newer versions
+- [X] T026 Review `specs/002-gnome-50-compatibility/verification-record.md`, `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md`, `specs/002-gnome-50-compatibility/evidence/package-build.md`, `specs/002-gnome-50-compatibility/evidence/package-scope.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-46.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-47.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-48.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-49.md`, `specs/002-gnome-50-compatibility/evidence/gnome-shell-50.md`, and `specs/002-gnome-50-compatibility/evidence/gnome-shell-50-1.md` for credentials, tokens, cookies, authorization headers, account identifiers, and raw provider payloads
+- [X] T027 Run final `tests/run-tests.sh` and update `specs/002-gnome-50-compatibility/evidence/non-shell-tests.md` with the final sanitized result
+- [X] T028 Rebuild `/tmp/codex-usage-pack/codex-usage@rado.shell-extension.zip` and update `specs/002-gnome-50-compatibility/evidence/package-build.md` plus `specs/002-gnome-50-compatibility/evidence/package-scope.md`
+- [X] T029 Verify `metadata.json`, `README.md`, and `specs/002-gnome-50-compatibility/verification-record.md` all avoid claims for GNOME Shell 50.2, 51, or newer versions
 
 ---
 
