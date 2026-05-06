@@ -4,6 +4,7 @@ import {
     normalizeCodexRateLimitsPayload,
     parseAuthStatusOutput,
     parseJsonRpcOutput,
+    subprocessPathForCommand,
 } from '../lib/codexAppServerSource.js';
 import {
     BUCKET_STATUSES,
@@ -125,6 +126,16 @@ assertEqual(apiKeyAuth.kind, REFRESH_STATES.WRONG_AUTH_MODE, 'API key auth rejec
 assertEqual(apiKeyAuth.apiKeyUsed, true, 'API key flag preserved');
 const missingAuth = parseAuthStatusOutput('Not logged in', '', false);
 assertEqual(missingAuth.kind, REFRESH_STATES.NOT_AUTHENTICATED, 'missing auth rejected');
+
+assertEqual(
+    subprocessPathForCommand('/home/user/.nvm/versions/node/v24/bin/codex', '/usr/bin:/bin'),
+    '/home/user/.nvm/versions/node/v24/bin:/usr/bin:/bin',
+    'absolute Codex command directory is added to subprocess PATH');
+assertEqual(
+    subprocessPathForCommand('/home/user/.nvm/versions/node/v24/bin/codex', '/home/user/.nvm/versions/node/v24/bin:/usr/bin'),
+    '/home/user/.nvm/versions/node/v24/bin:/usr/bin',
+    'existing Codex command directory is not duplicated');
+assertEqual(subprocessPathForCommand('codex', '/usr/bin:/bin'), '/usr/bin:/bin', 'PATH command keeps base PATH');
 
 const failureCases = [
     [REFRESH_STATES.NOT_AUTHENTICATED, OVERALL_STATUSES.NOT_AUTHENTICATED],

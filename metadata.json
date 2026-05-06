@@ -3,7 +3,7 @@
   "name": "Codex Usage Indicator",
   "description": "Shows current Codex Balance usage in the GNOME top bar.",
   "version": 2,
-  "shell-version": ["46", "47", "48", "49"],
+  "shell-version": ["46", "47", "48", "49", "50"],
   "settings-schema": "org.gnome.shell.extensions.codex-usage",
   "url": "https://github.com/rado/codex-usage-gnome-shell-ext"
 }
