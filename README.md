@@ -1,4 +1,4 @@
-# Codex Usage Indicator
+# Codex Usage Indicator for GNOME Shell
 
 ![screenshot.png](assets/screenshot.png)
 
