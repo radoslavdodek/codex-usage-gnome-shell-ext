@@ -7,7 +7,8 @@ cd "$ROOT_DIR"
 SCHEMA_TMP=$(mktemp -d "${TMPDIR:-/tmp}/codex-usage-schemas.XXXXXX")
 trap 'rm -rf "$SCHEMA_TMP"' EXIT
 glib-compile-schemas --targetdir="$SCHEMA_TMP" schemas
+export GSETTINGS_SCHEMA_DIR="$SCHEMA_TMP"
 
-gjs -m tests/formatter.test.js
-gjs -m tests/balanceSource.test.js
-gjs -m tests/redaction.test.js
+for test_file in tests/*.test.js; do
+    gjs -m "$test_file"
+done

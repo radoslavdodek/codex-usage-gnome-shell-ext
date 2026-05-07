@@ -163,7 +163,7 @@ const config = normalizeConfig({
 });
 assertEqual(config.sourceKind, 'codex-app-server', 'invalid source kind fallback');
 assertEqual(config.codexCommand, 'codex', 'invalid command fallback');
-assertEqual(config.refreshIntervalSeconds, 1800, 'invalid refresh interval fallback');
+assertEqual(config.refreshIntervalSeconds, 60, 'invalid refresh interval clamps to minimum');
 assertEqual(config.timeoutSeconds, 15, 'invalid timeout fallback');
 assertEqual(config.warningThresholdPercent, 25, 'invalid warning threshold fallback');
 assertEqual(config.displayFormat, 'bucket-percent', 'invalid display format fallback');

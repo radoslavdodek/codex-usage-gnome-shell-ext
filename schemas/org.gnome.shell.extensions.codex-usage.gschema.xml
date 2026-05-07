@@ -17,10 +17,15 @@
       <description>Executable path for the Codex CLI used by the app-server source.</description>
     </key>
     <key name="refresh-interval-seconds" type="i">
-      <range min="300" max="86400"/>
+      <range min="60" max="1800"/>
       <default>300</default>
       <summary>Automatic refresh interval</summary>
-      <description>Seconds between automatic refresh attempts.</description>
+      <description>Seconds between automatic refresh attempts, stored as whole minutes from 60 through 1800 seconds.</description>
+    </key>
+    <key name="refresh-paused" type="b">
+      <default>false</default>
+      <summary>Refresh pause</summary>
+      <description>Whether automatic and manual usage refresh attempts are paused.</description>
     </key>
     <key name="timeout-seconds" type="i">
       <range min="5" max="300"/>

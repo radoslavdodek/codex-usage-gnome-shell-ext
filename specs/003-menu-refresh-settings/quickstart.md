@@ -39,15 +39,15 @@ gnome-extensions enable codex-usage@rado
 
 Verify the menu controls in a live GNOME Shell session:
 
-- Open the indicator menu during initial loading; refresh interval and pause controls are visible.
-- Set interval to 1 minute; reopen the menu and verify it remains selected.
-- Set interval to 5 minutes; verify the default/current value displays correctly.
-- Set interval to 30 minutes; reopen the menu and verify it remains selected.
+- Open the indicator menu during initial loading; the Refresh Interval submenu and Refresh Pause switch are visible.
+- Open Refresh Interval and set it to 1 minute; reopen the menu and verify it remains selected.
+- Open Refresh Interval and set it to 5 minutes; verify the default/current value displays correctly.
+- Open Refresh Interval and set it to 30 minutes; reopen the menu and verify it remains selected.
 - Attempt values below 1 minute and above 30 minutes through direct settings writes; the extension does not crash or hide controls.
-- Enable refresh pause; the top-bar caption changes to exactly `Paused`.
+- Enable Refresh Pause; the top-bar caption changes to exactly `Paused`.
 - Wait through at least one configured interval while paused; no loading or refreshing caption appears.
 - Activate manual refresh while paused; no usage refresh starts and `Paused` remains visible.
-- Disable pause; refresh behavior resumes using the selected interval.
+- Disable Refresh Pause; refresh behavior resumes using the selected interval.
 - Repeat the checks while mock source states are loading, normal, stale, unavailable, rate-limited, malformed/error, not authenticated, and not configured.
 - Run at least 10 enable/disable cycles; no duplicate indicators, timers, menu rows, settings signals, or provider refreshes remain.
 

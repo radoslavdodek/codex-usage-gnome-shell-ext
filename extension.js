@@ -20,7 +20,15 @@ import {
     shouldMarkStale,
 } from './lib/model.js';
 import {MockBalanceSource} from './lib/mockSource.js';
-import {configFromSettings, connectSettings, disconnectSettings} from './lib/settings.js';
+import {
+    configFromSettings,
+    connectSettings,
+    disconnectSettings,
+    refreshIntervalMinuteLabel,
+    refreshIntervalMinutesToSeconds,
+    refreshIntervalSecondsToMinutes,
+    shouldStartRefresh,
+} from './lib/settings.js';
 
 const INDICATOR_ID = 'codex-usage-indicator';
 const PANEL_STATUS_CLASSES = [
@@ -32,6 +40,7 @@ const PANEL_STATUS_CLASSES = [
     'codex-usage-panel-not-authenticated',
     'codex-usage-panel-not-configured',
     'codex-usage-panel-error',
+    'codex-usage-panel-paused',
 ];
 
 const CodexUsageIndicator = GObject.registerClass(
@@ -102,9 +111,10 @@ export default class CodexUsageExtension extends Extension {
         this._refreshTimerId = 0;
 
         addPanelIndicator(Main, INDICATOR_ID, this._indicator, 0, 'right');
-        this._renderLoading();
+        this._render(this._effectiveSnapshot(this._snapshot));
         this._scheduleRefreshTimer();
-        this._refresh();
+        if (shouldStartRefresh(this._config))
+            this._refresh();
     }
 
     disable() {
@@ -135,27 +145,47 @@ export default class CodexUsageExtension extends Extension {
     }
 
     _onSettingsChanged() {
-        const oldSourceKind = this._config?.sourceKind;
-        const oldMockScenario = this._config?.mockScenario;
+        const oldConfig = this._config ?? {};
         this._config = configFromSettings(this._settings);
+        const sourceChanged = oldConfig.sourceKind !== this._config.sourceKind ||
+            oldConfig.mockScenario !== this._config.mockScenario;
+        const refreshIntervalChanged = oldConfig.refreshIntervalSeconds !== this._config.refreshIntervalSeconds;
+        const refreshPausedChanged = oldConfig.refreshPaused !== this._config.refreshPaused;
 
-        if (oldSourceKind !== this._config.sourceKind || oldMockScenario !== this._config.mockScenario) {
+        if (sourceChanged) {
             if (this._source)
                 this._source.destroy();
             this._source = createSource(this._config);
             this._lastSuccessfulSnapshot = null;
+            this._snapshot = null;
         }
+
+        if (this._config.refreshPaused && !oldConfig.refreshPaused)
+            this._cancelActiveRefresh();
 
         this._scheduleRefreshTimer();
         this._render(this._snapshot ? withDisplayFields(this._snapshot, this._config) : null);
-        this._refresh();
+        if (!shouldStartRefresh(this._config))
+            return;
+
+        if (sourceChanged || (refreshPausedChanged && oldConfig.refreshPaused) || (!refreshIntervalChanged && !refreshPausedChanged))
+            this._refresh();
     }
 
     _scheduleRefreshTimer() {
-        if (this._refreshTimerId)
+        if (this._refreshTimerId) {
             removeSource(this._refreshTimerId);
+            this._refreshTimerId = 0;
+        }
+
+        if (!shouldStartRefresh(this._config))
+            return;
 
         this._refreshTimerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, this._config.refreshIntervalSeconds, () => {
+            if (!shouldStartRefresh(this._config)) {
+                this._refreshTimerId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
             this._refresh();
             return GLib.SOURCE_CONTINUE;
         });
@@ -174,6 +204,11 @@ export default class CodexUsageExtension extends Extension {
     }
 
     _renderRefreshing() {
+        if (!shouldStartRefresh(this._config)) {
+            this._render(this._effectiveSnapshot(this._snapshot));
+            return;
+        }
+
         const snapshot = this._effectiveSnapshot(this._snapshot);
         if (snapshot)
             this._render({...snapshot, detailText: 'Refreshing Codex Balance'});
@@ -191,12 +226,22 @@ export default class CodexUsageExtension extends Extension {
     }
 
     _refresh() {
+        if (!shouldStartRefresh(this._config)) {
+            this._render(this._effectiveSnapshot(this._snapshot));
+            return Promise.resolve(null);
+        }
+
         if (this._refreshPromise)
             return this._refreshPromise;
+        if (!this._source)
+            return Promise.resolve(null);
 
         this._refreshCancellable = new Gio.Cancellable();
         this._refreshPromise = this._source.refresh(this._refreshCancellable, this._config)
             .then(snapshot => {
+                if (this._config.refreshPaused)
+                    return;
+
                 let effective = snapshot;
                 if (isSuccessfulSnapshot(snapshot)) {
                     this._lastSuccessfulSnapshot = snapshot;
@@ -207,6 +252,9 @@ export default class CodexUsageExtension extends Extension {
                 this._snapshot = effective;
             })
             .catch(error => {
+                if (this._config.refreshPaused)
+                    return;
+
                 const message = error?.message ?? 'Unable to refresh Codex Balance.';
                 if (this._lastSuccessfulSnapshot)
                     this._snapshot = markSnapshotStale(this._lastSuccessfulSnapshot, message);
@@ -226,8 +274,9 @@ export default class CodexUsageExtension extends Extension {
         if (!this._indicator)
             return;
 
-        const display = snapshot?.displayText ?? 'Codex Loading';
-        const status = snapshot?.overallStatus ?? OVERALL_STATUSES.LOADING;
+        const isPaused = Boolean(this._config?.refreshPaused);
+        const display = isPaused ? 'Paused' : snapshot?.displayText ?? 'Codex Loading';
+        const status = isPaused ? 'paused' : snapshot?.overallStatus ?? OVERALL_STATUSES.LOADING;
         this._indicator.setText(display);
         this._indicator.setStatus(status);
         this._rebuildMenu(snapshot);
@@ -240,37 +289,99 @@ export default class CodexUsageExtension extends Extension {
             const loading = new PopupMenu.PopupMenuItem('Refreshing Codex Balance', {reactive: false});
             loading.setSensitive(false);
             this._indicator.menu.addMenuItem(loading);
-            return;
+        } else {
+            let hasBucketRows = false;
+            if (snapshot.fiveHour) {
+                this._addBucketRow(snapshot.fiveHour);
+                hasBucketRows = true;
+            }
+            if (snapshot.weekly) {
+                this._addBucketRow(snapshot.weekly);
+                hasBucketRows = true;
+            }
+
+            if (hasBucketRows)
+                this._indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+            const stateItem = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false});
+            addLabelPair(stateItem, 'State', snapshot.detailText ?? snapshot.overallStatus, 'codex-usage-state-row');
+            this._indicator.menu.addMenuItem(stateItem);
+
+            const refreshItem = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false});
+            addLabelPair(refreshItem, 'Freshness', formatLastRefresh(snapshot.lastSuccessfulUpdateUnix), 'codex-usage-state-row');
+            this._indicator.menu.addMenuItem(refreshItem);
+
+            if (snapshot.errorMessage) {
+                const message = new PopupMenu.PopupMenuItem(snapshot.errorMessage, {reactive: false});
+                message.setSensitive(false);
+                message.add_style_class_name('codex-usage-message-row');
+                this._indicator.menu.addMenuItem(message);
+            }
         }
 
-        if (snapshot.fiveHour)
-            this._addBucketRow(snapshot.fiveHour);
-        if (snapshot.weekly)
-            this._addBucketRow(snapshot.weekly);
-
         this._indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        const stateItem = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false});
-        addLabelPair(stateItem, 'State', snapshot.detailText ?? snapshot.overallStatus, 'codex-usage-state-row');
-        this._indicator.menu.addMenuItem(stateItem);
-
-        const refreshItem = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false});
-        addLabelPair(refreshItem, 'Freshness', formatLastRefresh(snapshot.lastSuccessfulUpdateUnix), 'codex-usage-state-row');
-        this._indicator.menu.addMenuItem(refreshItem);
-
-        if (snapshot.errorMessage) {
-            const message = new PopupMenu.PopupMenuItem(snapshot.errorMessage, {reactive: false});
-            message.setSensitive(false);
-            message.add_style_class_name('codex-usage-message-row');
-            this._indicator.menu.addMenuItem(message);
-        }
-
+        this._addManualRefreshAction();
         this._indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        const action = new PopupMenu.PopupMenuItem(this._refreshPromise ? 'Refreshing...' : 'Refresh Now');
+        this._addRefreshSettingsMenuSection();
+    }
+
+    _addManualRefreshAction() {
+        const isPaused = Boolean(this._config?.refreshPaused);
+        const action = new PopupMenu.PopupMenuItem(this._refreshPromise && !isPaused ? 'Refreshing...' : 'Refresh Now');
         action.add_style_class_name('codex-usage-action-row');
-        action.setSensitive(!this._refreshPromise);
-        action.connect('activate', () => this._refresh());
+        action.setSensitive(!this._refreshPromise && !isPaused);
+        action.connect('activate', () => {
+            if (shouldStartRefresh(this._config))
+                this._refresh();
+        });
         this._indicator.menu.addMenuItem(action);
+    }
+
+    _addRefreshSettingsMenuSection() {
+        const currentMinutes = refreshIntervalSecondsToMinutes(this._config?.refreshIntervalSeconds);
+        const intervalItem = new PopupMenu.PopupSubMenuMenuItem(`Refresh Interval: ${refreshIntervalMinuteLabel(currentMinutes)}`);
+        intervalItem.add_style_class_name('codex-usage-refresh-interval-row');
+
+        for (let minute = 1; minute <= 30; minute++) {
+            const item = new PopupMenu.PopupMenuItem(
+                minute === currentMinutes ? `${refreshIntervalMinuteLabel(minute)} (current)` : refreshIntervalMinuteLabel(minute));
+            item.setSensitive(minute !== currentMinutes);
+            item.connect('activate', () => this._setRefreshIntervalMinutes(minute));
+            intervalItem.menu.addMenuItem(item);
+        }
+
+        this._indicator.menu.addMenuItem(intervalItem);
+
+        const pauseItem = new PopupMenu.PopupSwitchMenuItem('Refresh Pause', Boolean(this._config?.refreshPaused));
+        pauseItem.add_style_class_name('codex-usage-refresh-pause-row');
+        pauseItem.connect('toggled', (_item, state) => {
+            this._setRefreshPaused(typeof state === 'boolean' ? state : pauseItem.state);
+        });
+        this._indicator.menu.addMenuItem(pauseItem);
+    }
+
+    _setRefreshIntervalMinutes(minutes) {
+        if (!this._settings)
+            return;
+
+        const seconds = refreshIntervalMinutesToSeconds(minutes);
+        if (this._settings.get_int('refresh-interval-seconds') !== seconds)
+            this._settings.set_int('refresh-interval-seconds', seconds);
+    }
+
+    _setRefreshPaused(paused) {
+        if (!this._settings)
+            return;
+
+        if (this._settings.get_boolean('refresh-paused') !== paused)
+            this._settings.set_boolean('refresh-paused', paused);
+    }
+
+    _cancelActiveRefresh() {
+        if (this._refreshCancellable && !this._refreshCancellable.is_cancelled())
+            this._refreshCancellable.cancel();
+        if (this._source)
+            this._source.cancel();
     }
 
     _addBucketRow(bucket) {

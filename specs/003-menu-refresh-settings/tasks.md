@@ -15,9 +15,9 @@
 
 **Purpose**: Establish current implementation surfaces and verification artifacts before changing runtime behavior.
 
-- [ ] T001 Inspect current refresh settings, menu, preferences, schema, and test surfaces in `extension.js`, `lib/settings.js`, `prefs.js`, `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`, and `tests/run-tests.sh` against `specs/003-menu-refresh-settings/contracts/menu-refresh-settings.md` and `specs/003-menu-refresh-settings/contracts/settings-schema.md`
-- [ ] T002 [P] Create the manual verification record scaffold in `specs/003-menu-refresh-settings/verification-record.md` with sections for automated checks, User Story 1 interval checks, User Story 2 pause checks, User Story 3 state-reachability checks, and final lifecycle validation
-- [ ] T003 [P] Create sanitized evidence guidance in `specs/003-menu-refresh-settings/evidence/README.md` describing how to record GNOME Shell observations without credentials, tokens, account identifiers, or raw provider payloads
+- [X] T001 Inspect current refresh settings, menu, preferences, schema, and test surfaces in `extension.js`, `lib/settings.js`, `prefs.js`, `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`, and `tests/run-tests.sh` against `specs/003-menu-refresh-settings/contracts/menu-refresh-settings.md` and `specs/003-menu-refresh-settings/contracts/settings-schema.md`
+- [X] T002 [P] Create the manual verification record scaffold in `specs/003-menu-refresh-settings/verification-record.md` with sections for automated checks, User Story 1 interval checks, User Story 2 pause checks, User Story 3 state-reachability checks, and final lifecycle validation
+- [X] T003 [P] Create sanitized evidence guidance in `specs/003-menu-refresh-settings/evidence/README.md` describing how to record GNOME Shell observations without credentials, tokens, account identifiers, or raw provider payloads
 
 ---
 
@@ -27,13 +27,13 @@
 
 **Critical**: No user story implementation can begin until the schema, settings normalization, and shared test runner are ready.
 
-- [ ] T004 Update `tests/run-tests.sh` to discover and run every `tests/*.test.js` GJS module after compiling `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`
-- [ ] T005 [P] Add failing shared settings tests in `tests/settings.test.js` for default `refreshIntervalSeconds` 300, valid intervals 60/300/1800, out-of-range values 59/1801, whole-minute conversion helpers, `refreshPaused` default false, `configFromSettings()`, and `connectSettings()`
-- [ ] T006 Update `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml` so `refresh-interval-seconds` has range 60 through 1800 with default 300 and add boolean key `refresh-paused` with default false
-- [ ] T007 Update `lib/settings.js` to set `DEFAULT_CONFIG.refreshIntervalSeconds` to 300, normalize refresh intervals to 60 through 1800 seconds, expose whole-minute conversion helpers, include `refreshPaused` in `DEFAULT_CONFIG`, `normalizeConfig()`, `configFromSettings()`, and `connectSettings()`
-- [ ] T008 Update `prefs.js` refresh settings helper structure so the refresh group can bind second-backed minute controls and boolean switch controls from `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`
-- [ ] T009 Update `extension.js` settings-change flow to compare old and new refresh settings explicitly while recreating the usage source only when `source-kind` or `mock-scenario` changes
-- [ ] T010 Run `tests/run-tests.sh` and record the foundational automated result in `specs/003-menu-refresh-settings/verification-record.md`
+- [X] T004 Update `tests/run-tests.sh` to discover and run every `tests/*.test.js` GJS module after compiling `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`
+- [X] T005 [P] Add failing shared settings tests in `tests/settings.test.js` for default `refreshIntervalSeconds` 300, valid intervals 60/300/1800, out-of-range values 59/1801, whole-minute conversion helpers, `refreshPaused` default false, `configFromSettings()`, and `connectSettings()`
+- [X] T006 Update `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml` so `refresh-interval-seconds` has range 60 through 1800 with default 300 and add boolean key `refresh-paused` with default false
+- [X] T007 Update `lib/settings.js` to set `DEFAULT_CONFIG.refreshIntervalSeconds` to 300, normalize refresh intervals to 60 through 1800 seconds, expose whole-minute conversion helpers, include `refreshPaused` in `DEFAULT_CONFIG`, `normalizeConfig()`, `configFromSettings()`, and `connectSettings()`
+- [X] T008 Update `prefs.js` refresh settings helper structure so the refresh group can bind second-backed minute controls and boolean switch controls from `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`
+- [X] T009 Update `extension.js` settings-change flow to compare old and new refresh settings explicitly while recreating the usage source only when `source-kind` or `mock-scenario` changes
+- [X] T010 Run `tests/run-tests.sh` and record the foundational automated result in `specs/003-menu-refresh-settings/verification-record.md`
 
 **Checkpoint**: Settings schema, normalization, preferences plumbing, and tests are ready for user story work.
 
@@ -47,16 +47,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Add User Story 1 interval verification rows to `specs/003-menu-refresh-settings/verification-record.md` for menu visibility, values 1/5/30, direct out-of-range settings writes, persistence across menu reopen, and timer rescheduling
-- [ ] T012 [P] [US1] Extend `tests/settings.test.js` with interval-specific assertions for user-facing minute labels/values 1/5/30 and defensive normalization of direct numeric values outside 60 through 1800 seconds
+- [X] T011 [P] [US1] Add User Story 1 interval verification rows to `specs/003-menu-refresh-settings/verification-record.md` for menu visibility, values 1/5/30, direct out-of-range settings writes, persistence across menu reopen, and timer rescheduling
+- [X] T012 [P] [US1] Extend `tests/settings.test.js` with interval-specific assertions for user-facing minute labels/values 1/5/30 and defensive normalization of direct numeric values outside 60 through 1800 seconds
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Add a menu-owned refresh interval section in `extension.js` using existing `PopupMenu` and St patterns to display the current interval in whole minutes
-- [ ] T014 [US1] Wire interval menu activations in `extension.js` to write selected values 1 through 30 as seconds to the `refresh-interval-seconds` GSettings key
-- [ ] T015 [US1] Update `_scheduleRefreshTimer()` in `extension.js` to use normalized `this._config.refreshIntervalSeconds`, remove any old GLib source before adding a new one, and keep at most one automatic refresh timer after interval changes
-- [ ] T016 [P] [US1] Update the refresh interval preferences UI in `prefs.js` to display and edit whole minutes 1 through 30 while storing seconds in `refresh-interval-seconds`
-- [ ] T017 [US1] Run `tests/run-tests.sh` and record the User Story 1 automated result in `specs/003-menu-refresh-settings/verification-record.md`
+- [X] T013 [US1] Add a menu-owned refresh interval section in `extension.js` using existing `PopupMenu` and St patterns to display the current interval in whole minutes
+- [X] T014 [US1] Wire interval menu activations in `extension.js` to write selected values 1 through 30 as seconds to the `refresh-interval-seconds` GSettings key
+- [X] T015 [US1] Update `_scheduleRefreshTimer()` in `extension.js` to use normalized `this._config.refreshIntervalSeconds`, remove any old GLib source before adding a new one, and keep at most one automatic refresh timer after interval changes
+- [X] T016 [P] [US1] Update the refresh interval preferences UI in `prefs.js` to display and edit whole minutes 1 through 30 while storing seconds in `refresh-interval-seconds`
+- [X] T017 [US1] Run `tests/run-tests.sh` and record the User Story 1 automated result in `specs/003-menu-refresh-settings/verification-record.md`
 - [ ] T018 [US1] Install and enable the extension with the commands in `specs/003-menu-refresh-settings/quickstart.md`, change the interval to 1, 5, and 30 minutes from the menu, reopen/re-enable the extension, and record User Story 1 manual results in `specs/003-menu-refresh-settings/verification-record.md`
 
 **Checkpoint**: User Story 1 is complete when interval controls work from the menu, values persist, and automatic refreshes reschedule without duplicate timers.
@@ -71,18 +71,18 @@
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Add failing pause helper tests in `tests/refreshPause.test.js` covering a pure refresh-start guard that allows refresh when `refreshPaused` is false and suppresses refresh when `refreshPaused` is true
-- [ ] T020 [P] [US2] Add User Story 2 pause verification rows to `specs/003-menu-refresh-settings/verification-record.md` for pause switch visibility, exact `Paused` caption, automatic refresh suppression, manual refresh suppression, in-progress refresh suppression, unpause resume, and persistence
+- [X] T019 [P] [US2] Add failing pause helper tests in `tests/refreshPause.test.js` covering a pure refresh-start guard that allows refresh when `refreshPaused` is false and suppresses refresh when `refreshPaused` is true
+- [X] T020 [P] [US2] Add User Story 2 pause verification rows to `specs/003-menu-refresh-settings/verification-record.md` for pause switch visibility, exact `Paused` caption, automatic refresh suppression, manual refresh suppression, in-progress refresh suppression, unpause resume, and persistence
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Export the pure refresh-start guard from `lib/settings.js` and use it in `extension.js` to block manual and automatic refresh starts when `this._config.refreshPaused` is true
-- [ ] T022 [US2] Add a refresh pause switch/control to the menu refresh section in `extension.js` that reflects and writes the `refresh-paused` GSettings key
-- [ ] T023 [US2] Update `_render()` or a dedicated render helper in `extension.js` so `refreshPaused` takes precedence over all snapshots and sets the panel caption to exactly `Paused`
-- [ ] T024 [US2] Update `_scheduleRefreshTimer()` in `extension.js` to remove any existing GLib source and avoid arming a new timer while `this._config.refreshPaused` is true, then resume scheduling when pause is false
-- [ ] T025 [US2] Update `_onSettingsChanged()` and `_refresh().finally()` in `extension.js` so enabling pause during an in-progress refresh cancels or suppresses the visible refreshing state and leaves the panel on `Paused`
-- [ ] T026 [P] [US2] Add a `Refresh Pause` switch row to the refresh preferences group in `prefs.js` bound to `refresh-paused`
-- [ ] T027 [US2] Run `tests/run-tests.sh` and record the User Story 2 automated result in `specs/003-menu-refresh-settings/verification-record.md`
+- [X] T021 [US2] Export the pure refresh-start guard from `lib/settings.js` and use it in `extension.js` to block manual and automatic refresh starts when `this._config.refreshPaused` is true
+- [X] T022 [US2] Add a refresh pause switch/control to the menu refresh section in `extension.js` that reflects and writes the `refresh-paused` GSettings key
+- [X] T023 [US2] Update `_render()` or a dedicated render helper in `extension.js` so `refreshPaused` takes precedence over all snapshots and sets the panel caption to exactly `Paused`
+- [X] T024 [US2] Update `_scheduleRefreshTimer()` in `extension.js` to remove any existing GLib source and avoid arming a new timer while `this._config.refreshPaused` is true, then resume scheduling when pause is false
+- [X] T025 [US2] Update `_onSettingsChanged()` and `_refresh().finally()` in `extension.js` so enabling pause during an in-progress refresh cancels or suppresses the visible refreshing state and leaves the panel on `Paused`
+- [X] T026 [P] [US2] Add a `Refresh Pause` switch row to the refresh preferences group in `prefs.js` bound to `refresh-paused`
+- [X] T027 [US2] Run `tests/run-tests.sh` and record the User Story 2 automated result in `specs/003-menu-refresh-settings/verification-record.md`
 - [ ] T028 [US2] Install and enable the extension with `specs/003-menu-refresh-settings/quickstart.md`, verify pause through at least one interval plus a manual refresh attempt, unpause, and record User Story 2 manual results in `specs/003-menu-refresh-settings/verification-record.md`
 
 **Checkpoint**: User Story 2 is complete when pause persists, visibly overrides the panel caption, suppresses all refresh starts, and normal refresh behavior resumes after unpause.
@@ -97,13 +97,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T029 [P] [US3] Add User Story 3 state-reachability matrix rows to `specs/003-menu-refresh-settings/verification-record.md` for loading, normal, stale, unavailable, rate-limited, malformed/error, not-authenticated, not-configured, and paused states
+- [X] T029 [P] [US3] Add User Story 3 state-reachability matrix rows to `specs/003-menu-refresh-settings/verification-record.md` for loading, normal, stale, unavailable, rate-limited, malformed/error, not-authenticated, not-configured, and paused states
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Refactor `_rebuildMenu()` in `extension.js` so the no-snapshot/loading path no longer returns before adding the refresh settings section
-- [ ] T031 [US3] Add a reusable `_addRefreshSettingsMenuSection()` helper in `extension.js` and call it for loading, valid, stale, unauthenticated, not-configured, unavailable, error, rate-limited, malformed, and paused menu states
-- [ ] T032 [US3] Keep the manual refresh action visible in `extension.js` for snapshot and no-snapshot states, setting it insensitive while refreshing or paused and ensuring activation does not start work when paused
+- [X] T030 [US3] Refactor `_rebuildMenu()` in `extension.js` so the no-snapshot/loading path no longer returns before adding the refresh settings section
+- [X] T031 [US3] Add a reusable `_addRefreshSettingsMenuSection()` helper in `extension.js` and call it for loading, valid, stale, unauthenticated, not-configured, unavailable, error, rate-limited, malformed, and paused menu states
+- [X] T032 [US3] Keep the manual refresh action visible in `extension.js` for snapshot and no-snapshot states, setting it insensitive while refreshing or paused and ensuring activation does not start work when paused
 - [ ] T033 [US3] Use mock scenarios and direct settings from `prefs.js` or GSettings to exercise the state matrix in `specs/003-menu-refresh-settings/quickstart.md` and record User Story 3 manual results in `specs/003-menu-refresh-settings/verification-record.md`
 - [ ] T034 [US3] Run at least 10 extension enable/disable cycles and record absence of duplicate indicators, menu rows, settings signals, timers, and provider refreshes in `specs/003-menu-refresh-settings/verification-record.md`
 
@@ -115,12 +115,12 @@
 
 **Purpose**: Final documentation, visual cleanup, package hygiene, privacy review, and release validation across all stories.
 
-- [ ] T035 [P] Update `README.md` to document menu-based refresh interval control, the 1 through 30 minute range, refresh pause semantics, and the exact `Paused` caption
-- [ ] T036 [P] Review and update `stylesheet.css` for stable refresh menu row spacing or state styling introduced by `extension.js`
-- [ ] T037 Update `specs/003-menu-refresh-settings/quickstart.md` if the final menu control wording, settings smoke commands, or manual verification steps differ from the implemented UI
-- [ ] T038 Run final `tests/run-tests.sh` and record the final automated result in `specs/003-menu-refresh-settings/verification-record.md`
-- [ ] T039 Build the runtime package with the `gnome-extensions pack` command from `specs/003-menu-refresh-settings/quickstart.md` and record package path plus schema inclusion in `specs/003-menu-refresh-settings/verification-record.md`
-- [ ] T040 Review `README.md`, `specs/003-menu-refresh-settings/verification-record.md`, and `specs/003-menu-refresh-settings/evidence/README.md` for credentials, tokens, account identifiers, telemetry claims, and raw provider payloads
+- [X] T035 [P] Update `README.md` to document menu-based refresh interval control, the 1 through 30 minute range, refresh pause semantics, and the exact `Paused` caption
+- [X] T036 [P] Review and update `stylesheet.css` for stable refresh menu row spacing or state styling introduced by `extension.js`
+- [X] T037 Update `specs/003-menu-refresh-settings/quickstart.md` if the final menu control wording, settings smoke commands, or manual verification steps differ from the implemented UI
+- [X] T038 Run final `tests/run-tests.sh` and record the final automated result in `specs/003-menu-refresh-settings/verification-record.md`
+- [X] T039 Build the runtime package with the `gnome-extensions pack` command from `specs/003-menu-refresh-settings/quickstart.md` and record package path plus schema inclusion in `specs/003-menu-refresh-settings/verification-record.md`
+- [X] T040 Review `README.md`, `specs/003-menu-refresh-settings/verification-record.md`, and `specs/003-menu-refresh-settings/evidence/README.md` for credentials, tokens, account identifiers, telemetry claims, and raw provider payloads
 
 ---
 
