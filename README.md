@@ -90,6 +90,11 @@ headers, or raw provider payloads.
 
 Provider errors are redacted before they are shown in the UI.
 
+## License
+
+Codex Usage Indicator is licensed under the GNU Affero General Public License
+version 3. See [LICENSE](LICENSE).
+
 ## Technical Details
 
 Build instructions, local development setup, data-source internals, tests,

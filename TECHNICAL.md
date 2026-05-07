@@ -26,6 +26,7 @@ to `OPENAI_API_KEY`.
 
 Runtime package files:
 
+- `LICENSE`
 - `extension.js`
 - `metadata.json`
 - `prefs.js`
@@ -51,6 +52,7 @@ Preferred flow:
 ```sh
 mkdir -p /tmp/codex-usage-pack
 gnome-extensions pack -f -o /tmp/codex-usage-pack \
+  --extra-source=LICENSE \
   --extra-source=lib \
   --schema=schemas/org.gnome.shell.extensions.codex-usage.gschema.xml \
   .
@@ -173,6 +175,7 @@ Create a runtime-only extension archive:
 ```sh
 mkdir -p /tmp/codex-usage-pack
 gnome-extensions pack -f -o /tmp/codex-usage-pack \
+  --extra-source=LICENSE \
   --extra-source=lib \
   --schema=schemas/org.gnome.shell.extensions.codex-usage.gschema.xml \
   .
