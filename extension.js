@@ -101,7 +101,10 @@ export default class CodexUsageExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         this._config = configFromSettings(this._settings);
-        this._settingsSignals = connectSettings(this._settings, () => this._onSettingsChanged());
+        this._settingsChangedIdleId = 0;
+        this._renderIdleId = 0;
+        this._refreshStartIdleId = 0;
+        this._settingsSignals = connectSettings(this._settings, () => this._queueSettingsChanged());
         this._indicator = new CodexUsageIndicator();
         this._source = createSource(this._config);
         this._snapshot = null;
@@ -109,6 +112,12 @@ export default class CodexUsageExtension extends Extension {
         this._refreshPromise = null;
         this._refreshCancellable = null;
         this._refreshTimerId = 0;
+        this._refreshSequence = 0;
+        this._activeRefreshSequence = 0;
+        this._suppressedRefreshSequence = 0;
+        this._refreshAfterActiveSettles = false;
+        this._queuedRenderSnapshot = null;
+        this._hasQueuedRender = false;
 
         addPanelIndicator(Main, INDICATOR_ID, this._indicator, 0, 'right');
         this._render(this._effectiveSnapshot(this._snapshot));
@@ -121,6 +130,21 @@ export default class CodexUsageExtension extends Extension {
         if (this._refreshTimerId) {
             removeSource(this._refreshTimerId);
             this._refreshTimerId = 0;
+        }
+
+        if (this._settingsChangedIdleId) {
+            removeSource(this._settingsChangedIdleId);
+            this._settingsChangedIdleId = 0;
+        }
+
+        if (this._renderIdleId) {
+            removeSource(this._renderIdleId);
+            this._renderIdleId = 0;
+        }
+
+        if (this._refreshStartIdleId) {
+            removeSource(this._refreshStartIdleId);
+            this._refreshStartIdleId = 0;
         }
 
         if (this._refreshCancellable && !this._refreshCancellable.is_cancelled())
@@ -142,6 +166,26 @@ export default class CodexUsageExtension extends Extension {
         this._lastSuccessfulSnapshot = null;
         this._refreshPromise = null;
         this._refreshCancellable = null;
+        this._settingsChangedIdleId = 0;
+        this._renderIdleId = 0;
+        this._refreshStartIdleId = 0;
+        this._activeRefreshSequence = 0;
+        this._suppressedRefreshSequence = 0;
+        this._refreshAfterActiveSettles = false;
+        this._queuedRenderSnapshot = null;
+        this._hasQueuedRender = false;
+    }
+
+    _queueSettingsChanged() {
+        if (this._settingsChangedIdleId || !this._settings)
+            return;
+
+        this._settingsChangedIdleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            this._settingsChangedIdleId = 0;
+            if (this._settings)
+                this._onSettingsChanged();
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     _onSettingsChanged() {
@@ -153,6 +197,7 @@ export default class CodexUsageExtension extends Extension {
         const refreshPausedChanged = oldConfig.refreshPaused !== this._config.refreshPaused;
 
         if (sourceChanged) {
+            this._suppressActiveRefresh();
             if (this._source)
                 this._source.destroy();
             this._source = createSource(this._config);
@@ -160,16 +205,23 @@ export default class CodexUsageExtension extends Extension {
             this._snapshot = null;
         }
 
-        if (this._config.refreshPaused && !oldConfig.refreshPaused)
+        if (this._config.refreshPaused && !oldConfig.refreshPaused) {
+            this._refreshAfterActiveSettles = false;
             this._cancelActiveRefresh();
+        }
 
         this._scheduleRefreshTimer();
-        this._render(this._snapshot ? withDisplayFields(this._snapshot, this._config) : null);
+        this._queueRender(this._snapshot ? withDisplayFields(this._snapshot, this._config) : null);
         if (!shouldStartRefresh(this._config))
             return;
 
-        if (sourceChanged || (refreshPausedChanged && oldConfig.refreshPaused) || (!refreshIntervalChanged && !refreshPausedChanged))
-            this._refresh();
+        if (sourceChanged || (refreshPausedChanged && oldConfig.refreshPaused) || (!refreshIntervalChanged && !refreshPausedChanged)) {
+            if (this._refreshPromise) {
+                this._refreshAfterActiveSettles = true;
+                return;
+            }
+            this._queueRefreshStart();
+        }
     }
 
     _scheduleRefreshTimer() {
@@ -192,7 +244,7 @@ export default class CodexUsageExtension extends Extension {
     }
 
     _renderLoading() {
-        this._render({
+        this._queueRender({
             overallStatus: OVERALL_STATUSES.LOADING,
             displayText: 'Codex Loading',
             detailText: 'Refreshing Codex Balance',
@@ -205,13 +257,13 @@ export default class CodexUsageExtension extends Extension {
 
     _renderRefreshing() {
         if (!shouldStartRefresh(this._config)) {
-            this._render(this._effectiveSnapshot(this._snapshot));
+            this._queueRender(this._effectiveSnapshot(this._snapshot));
             return;
         }
 
         const snapshot = this._effectiveSnapshot(this._snapshot);
         if (snapshot)
-            this._render({...snapshot, detailText: 'Refreshing Codex Balance'});
+            this._queueRender({...snapshot, detailText: 'Refreshing Codex Balance'});
         else
             this._renderLoading();
     }
@@ -227,7 +279,7 @@ export default class CodexUsageExtension extends Extension {
 
     _refresh() {
         if (!shouldStartRefresh(this._config)) {
-            this._render(this._effectiveSnapshot(this._snapshot));
+            this._queueRender(this._effectiveSnapshot(this._snapshot));
             return Promise.resolve(null);
         }
 
@@ -236,10 +288,12 @@ export default class CodexUsageExtension extends Extension {
         if (!this._source)
             return Promise.resolve(null);
 
+        const refreshSequence = ++this._refreshSequence;
+        this._activeRefreshSequence = refreshSequence;
         this._refreshCancellable = new Gio.Cancellable();
         this._refreshPromise = this._source.refresh(this._refreshCancellable, this._config)
             .then(snapshot => {
-                if (this._config.refreshPaused)
+                if (!this._canApplyRefreshResult(refreshSequence))
                     return;
 
                 let effective = snapshot;
@@ -252,7 +306,7 @@ export default class CodexUsageExtension extends Extension {
                 this._snapshot = effective;
             })
             .catch(error => {
-                if (this._config.refreshPaused)
+                if (!this._canApplyRefreshResult(refreshSequence))
                     return;
 
                 const message = error?.message ?? 'Unable to refresh Codex Balance.';
@@ -260,14 +314,60 @@ export default class CodexUsageExtension extends Extension {
                     this._snapshot = markSnapshotStale(this._lastSuccessfulSnapshot, message);
             })
             .finally(() => {
-                this._refreshPromise = null;
-                this._refreshCancellable = null;
-                this._render(this._effectiveSnapshot(this._snapshot));
+                if (this._activeRefreshSequence === refreshSequence) {
+                    this._refreshPromise = null;
+                    this._refreshCancellable = null;
+                    this._activeRefreshSequence = 0;
+                }
+
+                this._queueRender(this._effectiveSnapshot(this._snapshot));
+
+                if (this._refreshAfterActiveSettles) {
+                    this._refreshAfterActiveSettles = false;
+                    this._queueRefreshStart();
+                }
             });
 
         this._renderRefreshing();
 
         return this._refreshPromise;
+    }
+
+    _canApplyRefreshResult(refreshSequence) {
+        return this._activeRefreshSequence === refreshSequence &&
+            this._suppressedRefreshSequence !== refreshSequence &&
+            shouldStartRefresh(this._config);
+    }
+
+    _queueRefreshStart() {
+        if (this._refreshStartIdleId || !this._source)
+            return;
+
+        this._refreshStartIdleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            this._refreshStartIdleId = 0;
+            if (this._source && shouldStartRefresh(this._config))
+                this._refresh();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _queueRender(snapshot) {
+        if (!this._indicator)
+            return;
+
+        this._queuedRenderSnapshot = snapshot;
+        this._hasQueuedRender = true;
+        if (this._renderIdleId)
+            return;
+
+        this._renderIdleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            this._renderIdleId = 0;
+            if (this._indicator && this._hasQueuedRender)
+                this._render(this._queuedRenderSnapshot);
+            this._queuedRenderSnapshot = null;
+            this._hasQueuedRender = false;
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     _render(snapshot) {
@@ -378,10 +478,16 @@ export default class CodexUsageExtension extends Extension {
     }
 
     _cancelActiveRefresh() {
+        this._suppressActiveRefresh();
         if (this._refreshCancellable && !this._refreshCancellable.is_cancelled())
             this._refreshCancellable.cancel();
         if (this._source)
             this._source.cancel();
+    }
+
+    _suppressActiveRefresh() {
+        if (this._refreshPromise)
+            this._suppressedRefreshSequence = this._activeRefreshSequence;
     }
 
     _addBucketRow(bucket) {
