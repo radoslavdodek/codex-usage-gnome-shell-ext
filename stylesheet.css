@@ -33,6 +33,10 @@
   color: #99c1f1;
 }
 
+.codex-usage-panel-paused .codex-usage-panel-label {
+  color: #f6d32d;
+}
+
 .codex-usage-bucket-row {
   padding: 8px 0;
 }
@@ -59,4 +63,10 @@
 
 .codex-usage-action-row {
   font-weight: 600;
+}
+
+.codex-usage-refresh-interval-row,
+.codex-usage-refresh-pause-row {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }

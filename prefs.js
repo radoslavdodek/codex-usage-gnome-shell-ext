@@ -65,6 +65,51 @@ function addSpinRow(group, settings, key, title, subtitle, min, max, step) {
     addActionRow(group, title, subtitle, spin);
 }
 
+function addMinuteSpinRow(group, settings, key, title, subtitle, min, max) {
+    const adjustment = new Gtk.Adjustment({
+        lower: min,
+        upper: max,
+        step_increment: 1,
+        page_increment: 5,
+        value: Math.round(settings.get_int(key) / 60),
+    });
+    const spin = new Gtk.SpinButton({
+        adjustment,
+        numeric: true,
+        valign: Gtk.Align.CENTER,
+    });
+    let updating = false;
+
+    const updateFromSettings = () => {
+        const minutes = Math.max(min, Math.min(max, Math.round(settings.get_int(key) / 60)));
+        if (adjustment.value === minutes)
+            return;
+        updating = true;
+        adjustment.value = minutes;
+        updating = false;
+    };
+
+    adjustment.connect('value-changed', () => {
+        if (updating)
+            return;
+        const seconds = Math.round(adjustment.value) * 60;
+        if (settings.get_int(key) !== seconds)
+            settings.set_int(key, seconds);
+    });
+    settings.connect(`changed::${key}`, updateFromSettings);
+    updateFromSettings();
+    addActionRow(group, title, subtitle, spin);
+}
+
+function addSwitchRow(group, settings, key, title, subtitle) {
+    const toggle = new Gtk.Switch({
+        active: settings.get_boolean(key),
+        valign: Gtk.Align.CENTER,
+    });
+    settings.bind(key, toggle, 'active', Gio.SettingsBindFlags.DEFAULT);
+    addActionRow(group, title, subtitle, toggle);
+}
+
 export default class CodexUsagePreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
@@ -91,7 +136,8 @@ export default class CodexUsagePreferences extends ExtensionPreferences {
         addActionRow(sourceGroup, 'Codex Command', 'Executable path used for codex app-server --listen stdio://.', commandEntry);
 
         const refreshGroup = new Adw.PreferencesGroup({title: 'Refresh'});
-        addSpinRow(refreshGroup, settings, 'refresh-interval-seconds', 'Refresh Interval', 'Automatic refresh interval in seconds.', 300, 86400, 60);
+        addMinuteSpinRow(refreshGroup, settings, 'refresh-interval-seconds', 'Refresh Interval', 'Automatic refresh interval in whole minutes.', 1, 30);
+        addSwitchRow(refreshGroup, settings, 'refresh-paused', 'Refresh Pause', 'Stop automatic and manual usage refresh attempts.');
         addSpinRow(refreshGroup, settings, 'timeout-seconds', 'Timeout', 'Maximum provider refresh time in seconds.', 5, 300, 1);
         addSpinRow(refreshGroup, settings, 'warning-threshold-percent', 'Warning Threshold', 'Percent remaining at or below which a bucket is low.', 1, 99, 1);
 

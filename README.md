@@ -95,13 +95,21 @@ Preferences are stored with GSettings under
 - Source: mock data or Codex app-server.
 - Mock scenario for local UI checks.
 - Codex command path, default `codex`.
-- Refresh interval, default 300 seconds, minimum 300 seconds.
+- Refresh interval, default 5 minutes, configurable from 1 through 30 whole
+  minutes.
+- Refresh Pause, default off. While active, automatic and manual refresh
+  attempts are suppressed and the panel caption is exactly `Paused`.
 - Provider timeout, default 15 seconds.
 - Warning threshold, default 25%.
 - Panel display format: bucket plus percent, percent only, or state label.
 - Bucket priority: lowest remaining, 5-hour, or weekly.
 
 Invalid values fall back to safe defaults.
+
+The indicator menu also exposes refresh controls directly. Open the menu to use
+the Refresh Interval submenu or the Refresh Pause switch without opening the
+preferences window. Interval choices are shown as whole minutes and are stored
+in GSettings as seconds.
 
 GNOME Shell may not inherit your interactive shell `PATH`. If Codex is
 installed through nvm, npm, pnpm, or another user-local toolchain, set the
@@ -179,7 +187,11 @@ GNOME Shell 50 and 50.1:
 
 - Exactly one indicator appears after enable.
 - The menu shows both Balance buckets, freshness, state, sanitized messages,
-  and manual refresh.
+  manual refresh, Refresh Interval, and Refresh Pause.
+- Refresh Interval accepts 1, 5, and 30 minute values and persists after menu
+  reopen and extension re-enable.
+- Refresh Pause changes the panel caption to exactly `Paused` and suppresses
+  automatic and manual refresh attempts until it is turned off.
 - Manual and automatic refresh do not overlap.
 - Failed refresh preserves previous good data as stale.
 - Not-authenticated, not-configured, API-key-auth, malformed, rate-limited,
