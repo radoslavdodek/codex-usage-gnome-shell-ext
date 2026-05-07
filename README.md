@@ -5,6 +5,8 @@ usage in the top bar and details in a dropdown menu.
 
 It supports GNOME Shell versions 46 to 50.
 
+Disclaimer: This project is not affiliated with or endorsed by OpenAI.
+
 ## Quick Start
 
 1. Install the Codex CLI and confirm it works:
