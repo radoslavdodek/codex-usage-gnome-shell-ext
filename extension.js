@@ -106,6 +106,8 @@ export default class CodexUsageExtension extends Extension {
         this._refreshStartIdleId = 0;
         this._settingsSignals = connectSettings(this._settings, () => this._queueSettingsChanged());
         this._indicator = new CodexUsageIndicator();
+        this._countdownRefreshTimerId = 0;
+        this._menuOpenSignalId = 0;
         this._source = createSource(this._config);
         this._snapshot = null;
         this._lastSuccessfulSnapshot = null;
@@ -119,6 +121,7 @@ export default class CodexUsageExtension extends Extension {
         this._queuedRenderSnapshot = null;
         this._hasQueuedRender = false;
 
+        this._connectMenuOpenSignal();
         addPanelIndicator(Main, INDICATOR_ID, this._indicator, 0, 'right');
         this._render(this._effectiveSnapshot(this._snapshot));
         this._scheduleRefreshTimer();
@@ -147,6 +150,13 @@ export default class CodexUsageExtension extends Extension {
             this._refreshStartIdleId = 0;
         }
 
+        this._stopCountdownRefreshTimer();
+
+        if (this._indicator && this._menuOpenSignalId) {
+            this._indicator.menu.disconnect(this._menuOpenSignalId);
+            this._menuOpenSignalId = 0;
+        }
+
         if (this._refreshCancellable && !this._refreshCancellable.is_cancelled())
             this._refreshCancellable.cancel();
 
@@ -170,6 +180,8 @@ export default class CodexUsageExtension extends Extension {
         this._settingsChangedIdleId = 0;
         this._renderIdleId = 0;
         this._refreshStartIdleId = 0;
+        this._countdownRefreshTimerId = 0;
+        this._menuOpenSignalId = 0;
         this._activeRefreshSequence = 0;
         this._suppressedRefreshSequence = 0;
         this._refreshAfterActiveSettles = false;
@@ -381,6 +393,7 @@ export default class CodexUsageExtension extends Extension {
         this._indicator.setText(display);
         this._indicator.setStatus(status);
         this._rebuildMenu(snapshot);
+        this._syncCountdownRefreshTimer(snapshot);
     }
 
     _rebuildMenu(snapshot) {
@@ -491,8 +504,70 @@ export default class CodexUsageExtension extends Extension {
             this._suppressedRefreshSequence = this._activeRefreshSequence;
     }
 
+    _connectMenuOpenSignal() {
+        if (!this._indicator || this._menuOpenSignalId)
+            return;
+
+        this._menuOpenSignalId = this._indicator.menu.connect('open-state-changed', (_menu, isOpen) => {
+            if (isOpen) {
+                const snapshot = this._effectiveSnapshot(this._snapshot);
+                this._queueRender(snapshot);
+                this._syncCountdownRefreshTimer(snapshot);
+            } else {
+                this._stopCountdownRefreshTimer();
+            }
+        });
+    }
+
+    _syncCountdownRefreshTimer(snapshot = this._effectiveSnapshot(this._snapshot)) {
+        if (!this._indicator?.menu?.isOpen) {
+            this._stopCountdownRefreshTimer();
+            return;
+        }
+
+        if (!this._hasCountdownReset(snapshot)) {
+            this._stopCountdownRefreshTimer();
+            return;
+        }
+
+        this._startCountdownRefreshTimer();
+    }
+
+    _hasCountdownReset(snapshot) {
+        return [snapshot?.fiveHour, snapshot?.weekly].some(bucket => Number.isFinite(bucket?.resetAtUnix));
+    }
+
+    _startCountdownRefreshTimer() {
+        if (this._countdownRefreshTimerId)
+            return;
+
+        this._countdownRefreshTimerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60, () => {
+            if (!this._indicator?.menu?.isOpen || !this._snapshot) {
+                this._countdownRefreshTimerId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
+
+            const snapshot = this._effectiveSnapshot(this._snapshot);
+            if (!this._hasCountdownReset(snapshot)) {
+                this._countdownRefreshTimerId = 0;
+                return GLib.SOURCE_REMOVE;
+            }
+
+            this._queueRender(snapshot);
+            return GLib.SOURCE_CONTINUE;
+        });
+    }
+
+    _stopCountdownRefreshTimer() {
+        if (!this._countdownRefreshTimerId)
+            return;
+
+        GLib.Source.remove(this._countdownRefreshTimerId);
+        this._countdownRefreshTimerId = 0;
+    }
+
     _addBucketRow(bucket) {
-        const row = formatBucketRow(bucket);
+        const row = formatBucketRow(bucket, {nowUnix: Math.floor(Date.now() / 1000)});
         const item = new PopupMenu.PopupBaseMenuItem({reactive: false, can_focus: false});
         item.add_style_class_name('codex-usage-bucket-row');
 

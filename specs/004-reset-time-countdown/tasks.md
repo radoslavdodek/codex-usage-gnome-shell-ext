@@ -17,10 +17,10 @@
 
 **Purpose**: Confirm the existing extension and test baseline before changing presentation behavior.
 
-- [ ] T001 Run the existing non-Shell test suite with `tests/run-tests.sh`
-- [ ] T002 [P] Review current reset data normalization in `lib/model.js` and confirm `resetAtUnix` remains the authoritative timestamp input
-- [ ] T003 [P] Review current menu bucket rendering in `extension.js` and identify the `_addBucketRow()` and `_rebuildMenu()` touch points for reset label display
-- [ ] T004 [P] Review existing formatter assertions in `tests/formatter.test.js` and note current absolute reset output expectations to replace
+- [X] T001 Run the existing non-Shell test suite with `tests/run-tests.sh`
+- [X] T002 [P] Review current reset data normalization in `lib/model.js` and confirm `resetAtUnix` remains the authoritative timestamp input
+- [X] T003 [P] Review current menu bucket rendering in `extension.js` and identify the `_addBucketRow()` and `_rebuildMenu()` touch points for reset label display
+- [X] T004 [P] Review existing formatter assertions in `tests/formatter.test.js` and note current absolute reset output expectations to replace
 
 ---
 
@@ -30,10 +30,10 @@
 
 **CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T005 Update `lib/formatter.js` function signatures so `formatReset(bucket, options = {})` and `formatBucketRow(bucket, options = {})` accept optional `nowUnix` without changing unrelated formatter behavior
-- [ ] T006 Update existing calls and assertions in `tests/formatter.test.js` to pass deterministic `nowUnix` where reset text is asserted
-- [ ] T007 Confirm `formatLastRefresh()` in `lib/formatter.js` still uses absolute local date/time formatting and is not routed through countdown logic
-- [ ] T008 Confirm no storage, provider, schema, or preferences changes are needed by leaving `lib/codexAppServerSource.js`, `lib/balanceSource.js`, `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`, and `prefs.js` behavior unchanged
+- [X] T005 Update `lib/formatter.js` function signatures so `formatReset(bucket, options = {})` and `formatBucketRow(bucket, options = {})` accept optional `nowUnix` without changing unrelated formatter behavior
+- [X] T006 Update existing calls and assertions in `tests/formatter.test.js` to pass deterministic `nowUnix` where reset text is asserted
+- [X] T007 Confirm `formatLastRefresh()` in `lib/formatter.js` still uses absolute local date/time formatting and is not routed through countdown logic
+- [X] T008 Confirm no storage, provider, schema, or preferences changes are needed by leaving `lib/codexAppServerSource.js`, `lib/balanceSource.js`, `schemas/org.gnome.shell.extensions.codex-usage.gschema.xml`, and `prefs.js` behavior unchanged
 
 **Checkpoint**: Formatter entry points accept deterministic time input, and reset presentation can change without touching acquisition, storage, settings, or preferences.
 
@@ -47,15 +47,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add failing formatter assertions for exactly 1 minute and 2h 15m countdowns in `tests/formatter.test.js`
-- [ ] T010 [P] [US1] Add a failing `formatBucketRow(bucket, {nowUnix})` assertion that row reset text is relative in `tests/formatter.test.js`
+- [X] T009 [P] [US1] Add failing formatter assertions for exactly 1 minute and 2h 15m countdowns in `tests/formatter.test.js`
+- [X] T010 [P] [US1] Add a failing `formatBucketRow(bucket, {nowUnix})` assertion that row reset text is relative in `tests/formatter.test.js`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement future reset countdown formatting in `formatReset()` in `lib/formatter.js` using `options.nowUnix` or current Unix time
-- [ ] T012 [US1] Thread formatter options from `formatBucketRow()` to `formatReset()` in `lib/formatter.js`
-- [ ] T013 [US1] Update `_addBucketRow()` in `extension.js` to call `formatBucketRow(bucket, {nowUnix: Math.floor(Date.now() / 1000)})`
-- [ ] T014 [US1] Run `tests/run-tests.sh` and verify the User Story 1 formatter assertions pass
+- [X] T011 [US1] Implement future reset countdown formatting in `formatReset()` in `lib/formatter.js` using `options.nowUnix` or current Unix time
+- [X] T012 [US1] Thread formatter options from `formatBucketRow()` to `formatReset()` in `lib/formatter.js`
+- [X] T013 [US1] Update `_addBucketRow()` in `extension.js` to call `formatBucketRow(bucket, {nowUnix: Math.floor(Date.now() / 1000)})`
+- [X] T014 [US1] Run `tests/run-tests.sh` and verify the User Story 1 formatter assertions pass
 
 **Checkpoint**: User Story 1 is functional and testable independently as the MVP.
 
@@ -69,14 +69,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T015 [P] [US2] Add formatter assertions for both 5-hour and weekly bucket rows using relative reset output in `tests/formatter.test.js`
-- [ ] T016 [P] [US2] Add a regression assertion that fallback `resetText` still produces `Resets {resetText}` when `resetAtUnix` is unavailable in `tests/formatter.test.js`
+- [X] T015 [P] [US2] Add formatter assertions for both 5-hour and weekly bucket rows using relative reset output in `tests/formatter.test.js`
+- [X] T016 [P] [US2] Add a regression assertion that fallback `resetText` still produces `Resets {resetText}` when `resetAtUnix` is unavailable in `tests/formatter.test.js`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Verify `_rebuildMenu()` in `extension.js` sends both `snapshot.fiveHour` and `snapshot.weekly` through the updated `_addBucketRow()` relative formatting path
-- [ ] T018 [US2] Remove or update any remaining absolute reset text expectation for bucket rows in `tests/formatter.test.js`
-- [ ] T019 [US2] Run `tests/run-tests.sh` and verify both-bucket and fallback reset assertions pass
+- [X] T017 [US2] Verify `_rebuildMenu()` in `extension.js` sends both `snapshot.fiveHour` and `snapshot.weekly` through the updated `_addBucketRow()` relative formatting path
+- [X] T018 [US2] Remove or update any remaining absolute reset text expectation for bucket rows in `tests/formatter.test.js`
+- [X] T019 [US2] Run `tests/run-tests.sh` and verify both-bucket and fallback reset assertions pass
 
 **Checkpoint**: User Stories 1 and 2 both work independently, and fallback reset behavior is preserved.
 
@@ -90,18 +90,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, more than 24 hours, due now, and elapsed reset timestamps in `tests/formatter.test.js`
-- [ ] T021 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in `tests/formatter.test.js`
+- [X] T020 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, more than 24 hours, due now, and elapsed reset timestamps in `tests/formatter.test.js`
+- [X] T021 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in `tests/formatter.test.js`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Extend `formatReset()` in `lib/formatter.js` to return `Resets in less than 1 minute`, `Resets in {hours}h`, total-hour compact text, and `Reset due` for the required boundary cases
-- [ ] T023 [US3] Add countdown repaint state fields `_countdownRefreshTimerId` and `_menuOpenSignalId` during `enable()` initialization in `extension.js`
-- [ ] T024 [US3] Connect the indicator menu open-state signal after `this._indicator` is created in `extension.js` and start countdown repaint work only when the menu is open
-- [ ] T025 [US3] Implement a minute-level GLib timeout helper in `extension.js` that re-renders the effective snapshot from memory without calling `_refresh()`, provider code, storage, settings, or credential paths
-- [ ] T026 [US3] Stop and clear the countdown repaint timeout when the menu closes in `extension.js`
-- [ ] T027 [US3] Disconnect the menu signal and remove the countdown repaint timeout during `disable()` cleanup in `extension.js`
-- [ ] T028 [US3] Run `tests/run-tests.sh` and verify all boundary formatter assertions pass
+- [X] T022 [US3] Extend `formatReset()` in `lib/formatter.js` to return `Resets in less than 1 minute`, `Resets in {hours}h`, total-hour compact text, and `Reset due` for the required boundary cases
+- [X] T023 [US3] Add countdown repaint state fields `_countdownRefreshTimerId` and `_menuOpenSignalId` during `enable()` initialization in `extension.js`
+- [X] T024 [US3] Connect the indicator menu open-state signal after `this._indicator` is created in `extension.js` and start countdown repaint work only when the menu is open
+- [X] T025 [US3] Implement a minute-level GLib timeout helper in `extension.js` that re-renders the effective snapshot from memory without calling `_refresh()`, provider code, storage, settings, or credential paths
+- [X] T026 [US3] Stop and clear the countdown repaint timeout when the menu closes in `extension.js`
+- [X] T027 [US3] Disconnect the menu signal and remove the countdown repaint timeout during `disable()` cleanup in `extension.js`
+- [X] T028 [US3] Run `tests/run-tests.sh` and verify all boundary formatter assertions pass
 
 **Checkpoint**: All user stories are independently functional, and countdown UI lifecycle ownership is explicit.
 
@@ -111,12 +111,12 @@
 
 **Purpose**: Final verification across automated tests, GNOME Shell behavior, lifecycle cleanup, and project documentation.
 
-- [ ] T029 [P] Execute the automated checks documented in `specs/004-reset-time-countdown/quickstart.md` using `tests/run-tests.sh`
+- [X] T029 [P] Execute the automated checks documented in `specs/004-reset-time-countdown/quickstart.md` using `tests/run-tests.sh`
 - [ ] T030 Manually verify mock-source countdown behavior, both bucket rows, minute-boundary repaint, and refresh pause behavior using `specs/004-reset-time-countdown/quickstart.md`
 - [ ] T031 Manually verify live-provider countdown behavior and unchanged `Freshness` absolute date/time display using `specs/004-reset-time-countdown/quickstart.md`
 - [ ] T032 Manually verify missing config, wrong auth mode, malformed reset data, stale data, manual refresh, automatic refresh, menu close, and repeated enable/disable cleanup using `specs/004-reset-time-countdown/quickstart.md`
-- [ ] T033 [P] Review privacy and data-acquisition scope in `lib/formatter.js`, `extension.js`, `lib/codexAppServerSource.js`, and `lib/balanceSource.js` to confirm no new data collection, storage, telemetry, subprocess, file read, or network behavior was introduced
-- [ ] T034 [P] Update user-facing documentation only if existing reset display examples are now stale in `README.md`
+- [X] T033 [P] Review privacy and data-acquisition scope in `lib/formatter.js`, `extension.js`, `lib/codexAppServerSource.js`, and `lib/balanceSource.js` to confirm no new data collection, storage, telemetry, subprocess, file read, or network behavior was introduced
+- [X] T034 [P] Update user-facing documentation only if existing reset display examples are now stale in `README.md`
 
 ---
 
