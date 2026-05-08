@@ -1,7 +1,7 @@
 # Codex Usage Indicator for GNOME Shell
 
 ![screenshot.png](assets/screenshot.png)
-![extension-preferences.png](assets/extension-preferences.png)
+![screenshot-preferences.png](assets/screenshot-preferences.png)
 
 Codex Usage Indicator is a GNOME Shell extension that shows your Codex Balance
 usage in the top bar and details in a dropdown menu.
