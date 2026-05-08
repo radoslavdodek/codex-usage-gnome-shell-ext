@@ -10,7 +10,7 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {CodexAppServerSource} from './lib/codexAppServerSource.js';
-import {addPanelIndicator, destroyActor, removeSource} from './lib/compatibility.js';
+import {addPanelIndicator} from './lib/compatibility.js';
 import {formatBucketRow, formatLastRefresh, withDisplayFields} from './lib/formatter.js';
 import {
     OVERALL_STATUSES,
@@ -128,22 +128,22 @@ export default class CodexUsageExtension extends Extension {
 
     disable() {
         if (this._refreshTimerId) {
-            removeSource(this._refreshTimerId);
+            GLib.Source.remove(this._refreshTimerId);
             this._refreshTimerId = 0;
         }
 
         if (this._settingsChangedIdleId) {
-            removeSource(this._settingsChangedIdleId);
+            GLib.Source.remove(this._settingsChangedIdleId);
             this._settingsChangedIdleId = 0;
         }
 
         if (this._renderIdleId) {
-            removeSource(this._renderIdleId);
+            GLib.Source.remove(this._renderIdleId);
             this._renderIdleId = 0;
         }
 
         if (this._refreshStartIdleId) {
-            removeSource(this._refreshStartIdleId);
+            GLib.Source.remove(this._refreshStartIdleId);
             this._refreshStartIdleId = 0;
         }
 
@@ -160,7 +160,8 @@ export default class CodexUsageExtension extends Extension {
         this._settingsSignals = [];
         this._settings = null;
 
-        destroyActor(this._indicator);
+        if (this._indicator)
+            this._indicator.destroy();
         this._indicator = null;
         this._snapshot = null;
         this._lastSuccessfulSnapshot = null;
@@ -226,7 +227,7 @@ export default class CodexUsageExtension extends Extension {
 
     _scheduleRefreshTimer() {
         if (this._refreshTimerId) {
-            removeSource(this._refreshTimerId);
+            GLib.Source.remove(this._refreshTimerId);
             this._refreshTimerId = 0;
         }
 
