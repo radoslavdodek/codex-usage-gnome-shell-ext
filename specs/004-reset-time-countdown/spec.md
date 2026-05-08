@@ -3,7 +3,7 @@
 **Feature Branch**: `004-reset-time-countdown`  
 **Created**: 2026-05-08  
 **Status**: Draft  
-**Input**: User description: "The reset time for 5-hour and weekly usage limit should be shown as number of hours/minutes from now, instead of date time string. For example \"Resets in 1 minute\" or \"Resets in 2h 15m\""
+**Input**: User description: "The reset time for 5-hour and weekly usage limit should be shown as number of hours/minutes from now, instead of date time string. For example \"Resets in 1 minute\" or \"Resets in 2h 15m\". For weekly usage limits more than 24 hours away, show days as well, for example \"Resets in 2d 13h 15m\"."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -19,7 +19,7 @@ As a Codex Usage Indicator user, I want each visible usage limit reset time to s
 
 1. **Given** the 5-hour usage limit has a reset time 1 minute from now, **When** the user views the limit details, **Then** the reset text reads "Resets in 1 minute".
 2. **Given** the weekly usage limit has a reset time 2 hours and 15 minutes from now, **When** the user views the limit details, **Then** the reset text reads "Resets in 2h 15m".
-3. **Given** either tracked usage limit has a reset time in the future, **When** the user views usage details, **Then** the reset text communicates remaining hours and/or minutes from the current time rather than a calendar date or clock time.
+3. **Given** either tracked usage limit has a reset time in the future, **When** the user views usage details, **Then** the reset text communicates remaining days, hours, and/or minutes from the current time rather than a calendar date or clock time.
 
 ---
 
@@ -35,6 +35,7 @@ As a user with both 5-hour and weekly usage limits visible, I want both reset va
 
 1. **Given** both 5-hour and weekly usage limits have reset times, **When** the user opens the usage details, **Then** both limits show reset countdowns in the same relative format.
 2. **Given** one limit resets sooner than the other, **When** the user compares the two reset labels, **Then** the shorter remaining duration is apparent from the displayed countdown values.
+3. **Given** the weekly usage limit resets more than 24 hours from now, **When** the user opens the usage details, **Then** the weekly reset label includes the number of days remaining, such as "Resets in 2d 13h 15m".
 
 ---
 
@@ -44,7 +45,7 @@ As a user, I want reset text to remain understandable when the reset is very soo
 
 **Why this priority**: Boundary values are less common but are likely to be noticed when the user is waiting for a limit to reset.
 
-**Independent Test**: Can be tested with reset times at less than a minute, exactly one minute, multiple hours, and already elapsed values, then verifying the displayed text remains clear and relative.
+**Independent Test**: Can be tested with reset times at less than a minute, exactly one minute, multiple hours, more than 24 hours, and already elapsed values, then verifying the displayed text remains clear and relative.
 
 **Acceptance Scenarios**:
 
@@ -58,7 +59,7 @@ As a user, I want reset text to remain understandable when the reset is very soo
 - The reset time is exactly 1 minute from the current time.
 - The reset time is exactly 1 hour from the current time.
 - The reset time includes both hours and minutes.
-- The reset time is more than 24 hours from the current time.
+- The reset time is more than 24 hours from the current time and should show days as well as remaining hours and minutes when present.
 - The reset time is already due or in the past because data is stale or local time changed.
 - One tracked limit has a reset time while the other does not.
 - Usage data is loading, stale, unavailable, malformed, or blocked by authentication/configuration.
@@ -75,12 +76,14 @@ As a user, I want reset text to remain understandable when the reset is very soo
 - **FR-005**: A future reset time of exactly 1 minute MUST be displayed with singular minute wording, such as "Resets in 1 minute".
 - **FR-006**: Future reset times that include hours and minutes MUST be displayed in compact hour/minute form, such as "Resets in 2h 15m".
 - **FR-007**: Future reset times with zero remaining minutes after one or more whole hours MUST omit the zero-minute portion.
-- **FR-008**: Reset timing text MUST avoid negative countdowns when the reset time is due, already elapsed, or stale.
-- **FR-009**: When a reset time is unavailable for a tracked limit, the extension MUST continue to show the existing unavailable or fallback state without introducing misleading countdown text.
-- **FR-010**: Relative reset text MUST update after usage data refreshes so it reflects the latest available reset time.
-- **FR-011**: Relative reset text SHOULD remain understandable if the menu remains open while time passes, without requiring the user to interpret an absolute timestamp.
-- **FR-012**: The feature MUST preserve existing usage amount, percentage, loading, error, authentication, configuration, stale-data, refresh interval, and refresh pause behavior.
-- **FR-013**: The feature MUST NOT change what usage data is collected, stored, transmitted, or exposed to third parties.
+- **FR-008**: Future reset times longer than 24 hours MUST include the number of full days remaining, such as "Resets in 2d 13h 15m".
+- **FR-009**: Future reset times longer than 24 hours MUST omit zero-value lower units when they are not needed for clarity.
+- **FR-010**: Reset timing text MUST avoid negative countdowns when the reset time is due, already elapsed, or stale.
+- **FR-011**: When a reset time is unavailable for a tracked limit, the extension MUST continue to show the existing unavailable or fallback state without introducing misleading countdown text.
+- **FR-012**: Relative reset text MUST update after usage data refreshes so it reflects the latest available reset time.
+- **FR-013**: Relative reset text SHOULD remain understandable if the menu remains open while time passes, without requiring the user to interpret an absolute timestamp.
+- **FR-014**: The feature MUST preserve existing usage amount, percentage, loading, error, authentication, configuration, stale-data, refresh interval, and refresh pause behavior.
+- **FR-015**: The feature MUST NOT change what usage data is collected, stored, transmitted, or exposed to third parties.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -93,7 +96,7 @@ As a user, I want reset text to remain understandable when the reset is very soo
 ### Measurable Outcomes
 
 - **SC-001**: In verification, 100% of available 5-hour and weekly reset values are shown as relative countdown text instead of absolute date/time strings.
-- **SC-002**: Test cases for 1 minute, combined hours and minutes, whole hours, less than 1 minute, and elapsed reset values all produce understandable reset text with no negative durations.
+- **SC-002**: Test cases for 1 minute, combined hours and minutes, whole hours, multi-day durations, less than 1 minute, and elapsed reset values all produce understandable reset text with no negative durations.
 - **SC-003**: A user can determine which visible limit resets sooner within 5 seconds when both 5-hour and weekly reset values are available.
 - **SC-004**: Existing loading, error, stale, authentication/configuration, refresh interval, and refresh pause states continue to pass their current verification checks after the display change.
 - **SC-005**: No usage data fields, account data, credentials, tokens, machine identifiers, or telemetry are newly displayed, stored, or transmitted as part of this feature.
@@ -103,5 +106,5 @@ As a user, I want reset text to remain understandable when the reset is very soo
 - The relative countdown applies to the reset labels shown in the extension's usage details for the 5-hour and weekly limits.
 - Durations are rounded down to whole minutes for compact display, except values under 1 minute are shown as an imminent reset rather than zero or a negative value.
 - The existing source of reset times remains authoritative; this feature changes presentation only.
-- The phrase "Resets in 1 minute" is preferred for the singular one-minute case, while compact notation such as "2h 15m" is preferred for multi-hour values.
+- The phrase "Resets in 1 minute" is preferred for the singular one-minute case, compact notation such as "2h 15m" is preferred for same-day multi-hour values, and compact notation such as "2d 13h 15m" is preferred for values over 24 hours.
 - Existing date/time formatting may remain available outside the primary 5-hour and weekly reset labels if used for unrelated metadata.

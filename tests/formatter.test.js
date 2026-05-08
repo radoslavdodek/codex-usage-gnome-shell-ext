@@ -89,7 +89,9 @@ assertEqual(formatReset({resetAtUnix: countdownNow + (2 * 60 * 60) + (15 * 60)},
 assertEqual(formatReset({resetAtUnix: countdownNow + 30}, {nowUnix: countdownNow}), 'Resets in less than 1 minute', 'sub-minute countdown');
 assertEqual(formatReset({resetAtUnix: countdownNow + (60 * 60)}, {nowUnix: countdownNow}), 'Resets in 1h', 'one hour countdown');
 assertEqual(formatReset({resetAtUnix: countdownNow + (3 * 60 * 60)}, {nowUnix: countdownNow}), 'Resets in 3h', 'whole hour countdown');
-assertEqual(formatReset({resetAtUnix: countdownNow + (49 * 60 * 60) + (30 * 60)}, {nowUnix: countdownNow}), 'Resets in 49h 30m', 'more than twenty-four hour countdown');
+assertEqual(formatReset({resetAtUnix: countdownNow + (2 * 24 * 60 * 60) + (13 * 60 * 60) + (15 * 60)}, {nowUnix: countdownNow}), 'Resets in 2d 13h 15m', 'multi-day countdown');
+assertEqual(formatReset({resetAtUnix: countdownNow + (2 * 24 * 60 * 60)}, {nowUnix: countdownNow}), 'Resets in 2d', 'whole-day countdown');
+assertEqual(formatReset({resetAtUnix: countdownNow + (2 * 24 * 60 * 60) + (4 * 60 * 60)}, {nowUnix: countdownNow}), 'Resets in 2d 4h', 'days and hours countdown');
 assertEqual(formatReset({resetAtUnix: countdownNow}, {nowUnix: countdownNow}), 'Reset due', 'due now reset');
 assertEqual(formatReset({resetAtUnix: countdownNow - 1}, {nowUnix: countdownNow}), 'Reset due', 'elapsed reset');
 assertEqual(formatReset(null, {nowUnix: countdownNow}), 'Reset unavailable', 'missing bucket reset text');
@@ -107,10 +109,10 @@ assertEqual(fiveHourCountdownRow.reset, 'Resets in 2h 15m', 'bucket row relative
 const weeklyCountdownRow = formatBucketRow({
     label: 'Weekly usage limit',
     percentRemaining: 95,
-    resetAtUnix: countdownNow + (49 * 60 * 60) + (30 * 60),
+    resetAtUnix: countdownNow + (2 * 24 * 60 * 60) + (13 * 60 * 60) + (15 * 60),
     status: BUCKET_STATUSES.NORMAL,
 }, {nowUnix: countdownNow});
-assertEqual(weeklyCountdownRow.reset, 'Resets in 49h 30m', 'weekly bucket row relative reset text');
+assertEqual(weeklyCountdownRow.reset, 'Resets in 2d 13h 15m', 'weekly bucket row relative reset text');
 
 const staleCountdownRow = formatBucketRow({
     label: '5-hour usage limit',

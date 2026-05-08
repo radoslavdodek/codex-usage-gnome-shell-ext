@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation passed. The specification describes the requested reset-time display behavior without implementation details or unresolved clarification markers.
+- Validation passed. The specification describes the requested reset-time display behavior, including multi-day weekly reset countdowns, without implementation details or unresolved clarification markers.

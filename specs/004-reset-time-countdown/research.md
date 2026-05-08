@@ -12,11 +12,11 @@
 
 **Alternatives considered**: Formatting directly in `extension.js` was rejected because it would make boundary behavior harder to test. Moving reset logic into `model.js` was rejected because the model should normalize data, not create time-dependent UI text.
 
-## Decision: Use Whole-Minute Countdown Rules With Explicit Boundaries
+## Decision: Use Whole-Minute Countdown Rules With Explicit Boundaries And Days
 
-**Rationale**: The spec asks for `Resets in 1 minute`, compact hour/minute examples such as `Resets in 2h 15m`, no zero-minute clutter for whole hours, future reset text beginning with `Resets in`, and no negative countdowns. Flooring future durations to whole minutes gives stable, predictable text. Durations under one minute should use `Resets in less than 1 minute` rather than `0m` or an absolute timestamp. Due or elapsed values should use `Reset due`.
+**Rationale**: The spec asks for `Resets in 1 minute`, compact hour/minute examples such as `Resets in 2h 15m`, multi-day weekly examples such as `Resets in 2d 13h 15m`, no zero-value clutter for whole hours or days, future reset text beginning with `Resets in`, and no negative countdowns. Flooring future durations to whole minutes gives stable, predictable text. Durations under one minute should use `Resets in less than 1 minute` rather than `0m` or an absolute timestamp. Due or elapsed values should use `Reset due`.
 
-**Alternatives considered**: Rounding to the nearest minute was rejected because it can overstate remaining time and produce `1 minute` when less than 30 seconds remain. Showing days for long weekly durations was rejected for this feature because the requested examples use hours/minutes; values over 24 hours can remain compact as hours.
+**Alternatives considered**: Rounding to the nearest minute was rejected because it can overstate remaining time and produce `1 minute` when less than 30 seconds remain. Showing total hours for long weekly durations was rejected because weekly limits can be more readable with full days shown explicitly.
 
 ## Decision: Preserve Existing Fallback Reset Text When No Timestamp Exists
 

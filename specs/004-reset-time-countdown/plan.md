@@ -5,7 +5,7 @@
 
 ## Summary
 
-Replace the primary 5-hour and weekly reset labels in the usage menu with relative countdown text such as `Resets in 1 minute`, `Resets in 2h 15m`, `Resets in less than 1 minute`, and `Reset due` for elapsed reset times. The implementation should change presentation only: keep Codex usage acquisition, bucket normalization, storage, authentication, pause/refresh settings, and panel display selection unchanged. Countdown formatting belongs in `lib/formatter.js` with deterministic tests, and the menu should repaint countdown labels at minute granularity while open so visible text remains understandable without forcing a data refresh.
+Replace the primary 5-hour and weekly reset labels in the usage menu with relative countdown text such as `Resets in 1 minute`, `Resets in 2h 15m`, `Resets in less than 1 minute`, `Resets in 2d 13h 15m`, and `Reset due` for elapsed reset times. The implementation should change presentation only: keep Codex usage acquisition, bucket normalization, storage, authentication, pause/refresh settings, and panel display selection unchanged. Countdown formatting belongs in `lib/formatter.js` with deterministic tests, and the menu should repaint countdown labels at minute granularity while open so visible text remains understandable without forcing a data refresh.
 
 ## Technical Context
 
@@ -13,7 +13,7 @@ Replace the primary 5-hour and weekly reset labels in the usage menu with relati
 **Primary Dependencies**: GNOME Shell extension APIs, `PopupMenu`, St, Gio, GLib, GObject, existing `lib/compatibility.js` helpers; no new third-party dependencies planned  
 **Usage Data Source**: Unchanged real source uses ChatGPT-authenticated `codex app-server --listen stdio://` and JSON-RPC `account/rateLimits/read`; mock source remains available for development/tests  
 **Storage**: No new storage; reset timestamps remain in snapshot bucket fields as `resetAtUnix`, fallback reset text remains transient as `resetText`, settings remain unchanged  
-**Testing**: Existing non-Shell GJS tests via `tests/run-tests.sh`, with added formatter coverage for relative reset boundaries; manual GNOME Shell checklist for menu display, live countdown repaint, stale/error/loading/auth/config states, refresh pause, and lifecycle cleanup  
+**Testing**: Existing non-Shell GJS tests via `tests/run-tests.sh`, with added formatter coverage for relative reset boundaries including multi-day weekly countdowns; manual GNOME Shell checklist for menu display, live countdown repaint, stale/error/loading/auth/config states, refresh pause, and lifecycle cleanup  
 **Target Platform**: GNOME Shell on Linux, versions 46, 47, 48, 49, and 50  
 **Project Type**: GNOME Shell extension  
 **Performance Goals**: No additional provider calls, subprocesses, file reads, network requests, or storage writes; at most one minute-level GLib timeout while the menu is open; timeout cleared on menu close and `disable()`; no synchronous I/O on the Shell UI path  
@@ -25,7 +25,7 @@ Replace the primary 5-hour and weekly reset labels in the usage menu with relati
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **GNOME lifecycle**: PASS. UI changes are limited to existing menu row rendering while enabled. The only new runtime ownership is a menu open-state signal and optional minute repaint timeout, both created after `enable()` and cleared on menu close and `disable()`.
-- **Glanceable UX**: PASS. The top-bar signal remains unchanged. Reset timing is still shown only in the dropdown usage details and becomes more glanceable.
+- **Glanceable UX**: PASS. The top-bar signal remains unchanged. Reset timing is still shown only in the dropdown usage details and becomes more glanceable, including weekly resets more than 24 hours away.
 - **Privacy**: PASS. The feature does not change usage acquisition, auth handling, redaction, telemetry behavior, storage, or any displayed account/credential fields.
 - **Data acquisition**: PASS. Provider/source modules remain isolated from rendering. Existing `resetAtUnix` data remains authoritative; the feature only changes formatting.
 - **Performance**: PASS. Countdown updates use the existing in-memory snapshot and do not refresh usage data. The optional repaint timer runs only while the menu is open and at minute granularity.
@@ -83,7 +83,7 @@ tests/
 
 - Reset countdown formatting should be handled in `lib/formatter.js`, not in provider modules or `extension.js`, so reset presentation is shared by menu rows and covered by non-Shell tests.
 - `resetAtUnix` should remain the authoritative input. Fallback `resetText` should still be used only when no valid timestamp exists, preserving existing unavailable/fallback behavior.
-- Formatting should floor future durations to whole minutes, use singular wording for exactly one minute, use compact hour/minute notation for durations of at least one hour, omit zero minutes for whole hours, show `Resets in less than 1 minute` for future values under one minute, and show `Reset due` for due, elapsed, or stale timestamps that are not in the future.
+- Formatting should floor future durations to whole minutes, use singular wording for exactly one minute, use compact hour/minute notation for same-day durations of at least one hour, include days for durations longer than 24 hours, omit zero-value lower units, show `Resets in less than 1 minute` for future values under one minute, and show `Reset due` for due, elapsed, or stale timestamps that are not in the future.
 - The menu can remain accurate while open by reconnecting rendering to current time only at minute granularity, without starting provider refreshes or storing derived countdown text.
 - Existing absolute date formatting should stay available for unrelated metadata such as `Last refresh`; the feature only replaces reset labels for 5-hour and weekly bucket rows.
 - Non-Shell tests should cover boundary values using injected `nowUnix`; manual GNOME Shell verification should cover both live provider and mock/reset states plus pause, stale, unavailable, auth/config, and lifecycle behavior.
@@ -96,7 +96,7 @@ See `specs/004-reset-time-countdown/research.md` for decisions and source notes.
 - Menu behavior and lifecycle expectations are defined in `contracts/reset-countdown-display.md`.
 - Formatter input/output expectations are defined in `contracts/formatter-contract.md`.
 - Development, automated checks, mock/manual verification, and lifecycle checks are defined in `quickstart.md`.
-- Agent context was updated in `AGENTS.md` to point at this implementation plan.
+- Agent context already points at `specs/004-reset-time-countdown/plan.md` in `AGENTS.md`; no further context-file path change is required.
 
 ## Post-Design Constitution Check
 
@@ -106,7 +106,7 @@ See `specs/004-reset-time-countdown/research.md` for decisions and source notes.
 - **Data acquisition**: PASS. No new acquisition path is introduced; countdown text is derived from existing normalized bucket fields.
 - **Performance**: PASS. No background provider work is added. The only optional runtime work is a single open-menu minute repaint based on in-memory state.
 - **Compatibility**: PASS. The design uses existing GJS Date/GLib and GNOME Shell menu APIs available across the supported Shell range.
-- **Testability**: PASS. Formatter boundaries are covered outside Shell with fixed timestamps, while menu repaint and lifecycle cleanup are covered by manual GNOME Shell verification.
+- **Testability**: PASS. Formatter boundaries, including multi-day reset text, are covered outside Shell with fixed timestamps, while menu repaint and lifecycle cleanup are covered by manual GNOME Shell verification.
 - **Packaging/configuration**: PASS. The package, settings schema, preferences, and install workflow remain unchanged.
 
 ## Complexity Tracking

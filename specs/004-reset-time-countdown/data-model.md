@@ -34,8 +34,9 @@ User-facing reset phrase derived from `UsageLimitReset` and current time.
 - Future durations under 1 minute display as `Resets in less than 1 minute`.
 - Future durations of at least 1 hour display compact hours/minutes, for example `Resets in 2h 15m`.
 - Whole-hour future durations omit the minute portion, for example `Resets in 2h`.
+- Future durations longer than 24 hours include full days, for example `Resets in 2d 13h 15m`.
+- Multi-day durations omit zero-value lower units when not needed, for example `Resets in 2d` or `Resets in 2d 4h`.
 - Elapsed or due timestamps display `Reset due` and never include negative numbers.
-- More-than-24-hour durations remain comparable by using total hours, for example `Resets in 49h 30m`.
 
 ## UsageDetailDisplay
 

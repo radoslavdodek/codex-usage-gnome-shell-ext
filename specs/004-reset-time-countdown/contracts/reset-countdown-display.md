@@ -11,6 +11,8 @@ This contract defines the user-visible dropdown behavior for 5-hour and weekly r
 - Exactly one remaining minute MUST display `Resets in 1 minute`.
 - Durations with hours and minutes MUST use compact notation such as `Resets in 2h 15m`.
 - Whole-hour durations MUST omit a zero-minute suffix.
+- Durations longer than 24 hours MUST include full days, such as `Resets in 2d 13h 15m`.
+- Multi-day durations MUST omit zero-value lower units when they are not needed for clarity.
 - Future durations under one minute MUST display `Resets in less than 1 minute`.
 - Due or elapsed reset timestamps MUST display `Reset due` and MUST NOT display a future countdown, negative number, or absolute date/time string.
 - Buckets without valid reset timestamps MUST keep the existing fallback behavior: provider `resetText` if present, otherwise `Reset unavailable`.
@@ -33,6 +35,7 @@ This contract defines the user-visible dropdown behavior for 5-hour and weekly r
 
 - With a 5-hour reset one minute away, the menu row reads `Resets in 1 minute`.
 - With a weekly reset two hours and fifteen minutes away, the menu row reads `Resets in 2h 15m`.
+- With a weekly reset two days, thirteen hours, and fifteen minutes away, the menu row reads `Resets in 2d 13h 15m`.
 - With both limits visible, both rows use relative reset text.
 - With a reset less than one minute away, the row reads `Resets in less than 1 minute`.
 - With a reset in the past, the row reads `Reset due`.

@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/004-reset-time-countdown/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, quickstart.md, contracts/
 
-**Tests**: Formatter behavior is required for this feature. Add deterministic non-Shell GJS coverage before changing reset formatting, then run `tests/run-tests.sh`. Manual GNOME Shell verification is required for menu repaint, failure states, refresh pause, and lifecycle cleanup.
+**Tests**: Formatter behavior is required for this feature. Add deterministic non-Shell GJS coverage before changing reset formatting, then run `tests/run-tests.sh`. Manual GNOME Shell verification is required for menu repaint, failure states, refresh pause, multi-day weekly reset text, and lifecycle cleanup.
 
 **Organization**: Tasks are grouped by user story so each story can be implemented and tested as an independent increment.
 
@@ -20,7 +20,7 @@
 - [X] T001 Run the existing non-Shell test suite with `tests/run-tests.sh`
 - [X] T002 [P] Review current reset data normalization in `lib/model.js` and confirm `resetAtUnix` remains the authoritative timestamp input
 - [X] T003 [P] Review current menu bucket rendering in `extension.js` and identify the `_addBucketRow()` and `_rebuildMenu()` touch points for reset label display
-- [X] T004 [P] Review existing formatter assertions in `tests/formatter.test.js` and note current absolute reset output expectations to replace
+- [X] T004 [P] Review existing formatter assertions in `tests/formatter.test.js` and note current absolute or long-duration reset output expectations to replace
 
 ---
 
@@ -63,20 +63,22 @@
 
 ## Phase 4: User Story 2 - Compare Multiple Limit Resets (Priority: P2)
 
-**Goal**: Ensure both visible 5-hour and weekly rows use the same relative reset style so users can compare reset timing quickly.
+**Goal**: Ensure both visible 5-hour and weekly rows use the same relative reset style, and weekly resets more than 24 hours away include days so users can compare reset timing quickly.
 
-**Independent Test**: With both bucket resets available, `formatBucketRow()` produces relative reset text for both buckets and the menu renders both rows using the same style.
+**Independent Test**: With both bucket resets available, `formatBucketRow()` produces relative reset text for both buckets, including `Resets in 2d 13h 15m` for a long weekly reset, and the menu renders both rows using the same style.
 
 ### Tests for User Story 2
 
 - [X] T015 [P] [US2] Add formatter assertions for both 5-hour and weekly bucket rows using relative reset output in `tests/formatter.test.js`
-- [X] T016 [P] [US2] Add a regression assertion that fallback `resetText` still produces `Resets {resetText}` when `resetAtUnix` is unavailable in `tests/formatter.test.js`
+- [X] T016 [P] [US2] Add formatter assertions for weekly reset durations longer than 24 hours such as `Resets in 2d 13h 15m` in `tests/formatter.test.js`
+- [X] T017 [P] [US2] Add a regression assertion that fallback `resetText` still produces `Resets {resetText}` when `resetAtUnix` is unavailable in `tests/formatter.test.js`
 
 ### Implementation for User Story 2
 
-- [X] T017 [US2] Verify `_rebuildMenu()` in `extension.js` sends both `snapshot.fiveHour` and `snapshot.weekly` through the updated `_addBucketRow()` relative formatting path
-- [X] T018 [US2] Remove or update any remaining absolute reset text expectation for bucket rows in `tests/formatter.test.js`
-- [X] T019 [US2] Run `tests/run-tests.sh` and verify both-bucket and fallback reset assertions pass
+- [X] T018 [US2] Extend `formatReset()` in `lib/formatter.js` so future reset durations longer than 24 hours include full days and remaining hours/minutes
+- [X] T019 [US2] Verify `_rebuildMenu()` in `extension.js` sends both `snapshot.fiveHour` and `snapshot.weekly` through the updated `_addBucketRow()` relative formatting path
+- [X] T020 [US2] Remove or update any remaining long-duration or absolute reset text expectation for bucket rows in `tests/formatter.test.js`
+- [X] T021 [US2] Run `tests/run-tests.sh` and verify both-bucket, multi-day weekly, and fallback reset assertions pass
 
 **Checkpoint**: User Stories 1 and 2 both work independently, and fallback reset behavior is preserved.
 
@@ -84,24 +86,25 @@
 
 ## Phase 5: User Story 3 - Handle Boundary Reset Values (Priority: P3)
 
-**Goal**: Keep reset text clear and non-negative for imminent, exact-boundary, whole-hour, long-duration, due, elapsed, missing, and stale reset timestamps.
+**Goal**: Keep reset text clear and non-negative for imminent, exact-boundary, whole-hour, whole-day, multi-day, due, elapsed, missing, and stale reset timestamps.
 
 **Independent Test**: Deterministic formatter cases cover all boundary values, and an open menu refreshes countdown labels at minute granularity without fetching new usage data.
 
 ### Tests for User Story 3
 
-- [X] T020 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, more than 24 hours, due now, and elapsed reset timestamps in `tests/formatter.test.js`
-- [X] T021 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in `tests/formatter.test.js`
+- [X] T022 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, due now, and elapsed reset timestamps in `tests/formatter.test.js`
+- [X] T023 [P] [US3] Add formatter assertions for whole-day and days-plus-hours zero-minute cases such as `Resets in 2d` and `Resets in 2d 4h` in `tests/formatter.test.js`
+- [X] T024 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in `tests/formatter.test.js`
 
 ### Implementation for User Story 3
 
-- [X] T022 [US3] Extend `formatReset()` in `lib/formatter.js` to return `Resets in less than 1 minute`, `Resets in {hours}h`, total-hour compact text, and `Reset due` for the required boundary cases
-- [X] T023 [US3] Add countdown repaint state fields `_countdownRefreshTimerId` and `_menuOpenSignalId` during `enable()` initialization in `extension.js`
-- [X] T024 [US3] Connect the indicator menu open-state signal after `this._indicator` is created in `extension.js` and start countdown repaint work only when the menu is open
-- [X] T025 [US3] Implement a minute-level GLib timeout helper in `extension.js` that re-renders the effective snapshot from memory without calling `_refresh()`, provider code, storage, settings, or credential paths
-- [X] T026 [US3] Stop and clear the countdown repaint timeout when the menu closes in `extension.js`
-- [X] T027 [US3] Disconnect the menu signal and remove the countdown repaint timeout during `disable()` cleanup in `extension.js`
-- [X] T028 [US3] Run `tests/run-tests.sh` and verify all boundary formatter assertions pass
+- [X] T025 [US3] Extend `formatReset()` in `lib/formatter.js` to return `Resets in less than 1 minute`, `Resets in {hours}h`, `Resets in {days}d`, `Resets in {days}d {hours}h`, and `Reset due` for the required boundary cases
+- [X] T026 [US3] Add countdown repaint state fields `_countdownRefreshTimerId` and `_menuOpenSignalId` during `enable()` initialization in `extension.js`
+- [X] T027 [US3] Connect the indicator menu open-state signal after `this._indicator` is created in `extension.js` and start countdown repaint work only when the menu is open
+- [X] T028 [US3] Implement a minute-level GLib timeout helper in `extension.js` that re-renders the effective snapshot from memory without calling `_refresh()`, provider code, storage, settings, or credential paths
+- [X] T029 [US3] Stop and clear the countdown repaint timeout when the menu closes in `extension.js`
+- [X] T030 [US3] Disconnect the menu signal and remove the countdown repaint timeout during `disable()` cleanup in `extension.js`
+- [X] T031 [US3] Run `tests/run-tests.sh` and verify all boundary formatter assertions pass
 
 **Checkpoint**: All user stories are independently functional, and countdown UI lifecycle ownership is explicit.
 
@@ -111,12 +114,12 @@
 
 **Purpose**: Final verification across automated tests, GNOME Shell behavior, lifecycle cleanup, and project documentation.
 
-- [X] T029 [P] Execute the automated checks documented in `specs/004-reset-time-countdown/quickstart.md` using `tests/run-tests.sh`
-- [ ] T030 Manually verify mock-source countdown behavior, both bucket rows, minute-boundary repaint, and refresh pause behavior using `specs/004-reset-time-countdown/quickstart.md`
-- [ ] T031 Manually verify live-provider countdown behavior and unchanged `Freshness` absolute date/time display using `specs/004-reset-time-countdown/quickstart.md`
-- [ ] T032 Manually verify missing config, wrong auth mode, malformed reset data, stale data, manual refresh, automatic refresh, menu close, and repeated enable/disable cleanup using `specs/004-reset-time-countdown/quickstart.md`
-- [X] T033 [P] Review privacy and data-acquisition scope in `lib/formatter.js`, `extension.js`, `lib/codexAppServerSource.js`, and `lib/balanceSource.js` to confirm no new data collection, storage, telemetry, subprocess, file read, or network behavior was introduced
-- [X] T034 [P] Update user-facing documentation only if existing reset display examples are now stale in `README.md`
+- [X] T032 [P] Execute the automated checks documented in `specs/004-reset-time-countdown/quickstart.md` using `tests/run-tests.sh`
+- [ ] T033 Manually verify mock-source countdown behavior, both bucket rows, multi-day weekly reset text, minute-boundary repaint, and refresh pause behavior using `specs/004-reset-time-countdown/quickstart.md`
+- [ ] T034 Manually verify live-provider countdown behavior, weekly reset values more than 24 hours away, and unchanged `Freshness` absolute date/time display using `specs/004-reset-time-countdown/quickstart.md`
+- [ ] T035 Manually verify missing config, wrong auth mode, malformed reset data, stale data, manual refresh, automatic refresh, menu close, and repeated enable/disable cleanup using `specs/004-reset-time-countdown/quickstart.md`
+- [X] T036 [P] Review privacy and data-acquisition scope in `lib/formatter.js`, `extension.js`, `lib/codexAppServerSource.js`, and `lib/balanceSource.js` to confirm no new data collection, storage, telemetry, subprocess, file read, or network behavior was introduced
+- [X] T037 [P] Update user-facing documentation only if existing reset display examples are now stale in `README.md`
 
 ---
 
@@ -134,7 +137,7 @@
 ### User Story Dependencies
 
 - **US1 (P1)**: No dependency on other user stories after Foundation.
-- **US2 (P2)**: Can be tested independently with both bucket rows, but expects the relative formatter path introduced by US1.
+- **US2 (P2)**: Can be tested independently with both bucket rows and a multi-day weekly reset, but expects the relative formatter path introduced by US1.
 - **US3 (P3)**: Extends the shared formatter and menu lifecycle behavior after the base relative display exists.
 
 ### Within Each User Story
@@ -148,9 +151,9 @@
 
 - Setup review tasks T002, T003, and T004 can run in parallel.
 - US1 test tasks T009 and T010 can run in parallel.
-- US2 test tasks T015 and T016 can run in parallel.
-- US3 test tasks T020 and T021 can run in parallel.
-- Polish tasks T029, T033, and T034 can run in parallel with manual verification preparation once implementation is complete.
+- US2 test tasks T015, T016, and T017 can run in parallel.
+- US3 test tasks T022, T023, and T024 can run in parallel.
+- Polish tasks T032, T036, and T037 can run in parallel with manual verification preparation once implementation is complete.
 
 ## Parallel Example: User Story 1
 
@@ -163,14 +166,16 @@ Task: "T010 [P] [US1] Add a failing formatBucketRow(bucket, {nowUnix}) assertion
 
 ```bash
 Task: "T015 [P] [US2] Add formatter assertions for both 5-hour and weekly bucket rows using relative reset output in tests/formatter.test.js"
-Task: "T016 [P] [US2] Add a regression assertion that fallback resetText still produces Resets {resetText} when resetAtUnix is unavailable in tests/formatter.test.js"
+Task: "T016 [P] [US2] Add formatter assertions for weekly reset durations longer than 24 hours such as Resets in 2d 13h 15m in tests/formatter.test.js"
+Task: "T017 [P] [US2] Add a regression assertion that fallback resetText still produces Resets {resetText} when resetAtUnix is unavailable in tests/formatter.test.js"
 ```
 
 ## Parallel Example: User Story 3
 
 ```bash
-Task: "T020 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, more than 24 hours, due now, and elapsed reset timestamps in tests/formatter.test.js"
-Task: "T021 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in tests/formatter.test.js"
+Task: "T022 [P] [US3] Add formatter assertions for less than 1 minute, exactly 1 hour, whole hours, due now, and elapsed reset timestamps in tests/formatter.test.js"
+Task: "T023 [P] [US3] Add formatter assertions for whole-day and days-plus-hours zero-minute cases such as Resets in 2d and Resets in 2d 4h in tests/formatter.test.js"
+Task: "T024 [P] [US3] Add formatter assertions for missing bucket, missing reset timestamp, unavailable reset data, and stale bucket reset data in tests/formatter.test.js"
 ```
 
 ## Implementation Strategy
@@ -185,7 +190,7 @@ Task: "T021 [P] [US3] Add formatter assertions for missing bucket, missing reset
 ### Incremental Delivery
 
 1. Deliver US1 to replace absolute reset date/time strings with relative countdowns.
-2. Deliver US2 to confirm both tracked limit rows consistently use the same style while fallback behavior remains intact.
+2. Deliver US2 to confirm both tracked limit rows consistently use the same style, multi-day weekly reset text is shown, and fallback behavior remains intact.
 3. Deliver US3 to harden boundary values and open-menu minute repaint lifecycle.
 4. Complete Phase 6 before release or PR review.
 

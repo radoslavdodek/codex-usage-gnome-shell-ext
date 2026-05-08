@@ -23,7 +23,9 @@ The reset output is a string suitable for direct menu display.
 | future delta is exactly 60 seconds | `Resets in 1 minute` |
 | future delta is 2 hours 15 minutes | `Resets in 2h 15m` |
 | future delta is whole hours | `Resets in {hours}h` |
-| future delta is more than 24 hours | total-hour compact phrase such as `Resets in 49h 30m` |
+| future delta is 2 days 13 hours 15 minutes | `Resets in 2d 13h 15m` |
+| future delta is whole days | `Resets in {days}d` |
+| future delta is days and hours with zero minutes | `Resets in {days}d {hours}h` |
 | delta is zero or negative | `Reset due` |
 
 ## Non-Goals
@@ -35,5 +37,5 @@ The reset output is a string suitable for direct menu display.
 
 ## Test Requirements
 
-- Formatter tests MUST inject `nowUnix` and assert exact strings for one minute, combined hours/minutes, whole hours, less than one minute, elapsed values, unavailable values, and fallback `resetText`.
+- Formatter tests MUST inject `nowUnix` and assert exact strings for one minute, combined hours/minutes, whole hours, multi-day durations, less than one minute, elapsed values, unavailable values, and fallback `resetText`.
 - Existing panel display and bucket status tests MUST continue to pass.
